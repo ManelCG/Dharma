@@ -33,7 +33,7 @@ LDIR=lib
 
 LIBS = -lm -lpthread
 
-_DEPS =
+_DEPS = dharma_defines.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 _OBJ = dharma.o
