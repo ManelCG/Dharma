@@ -17,25 +17,13 @@
  *
  */
 
-#include <gtk/gtk.h>
-
-#include <stdio.h>
-
-#include <dharma_defines.h>
 #include <dharma_math.h>
 
-int main(int argc, char *argv[]){
-  gtk_init(&argc, &argv);
+uint64_t dharma_math_uint_pow(uint32_t a, uint32_t b){
+  uint32_t base = 1;
+  for (; b > 0; b--){
+    base*=a;
+  }
 
-  GtkWidget *window_root = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title(GTK_WINDOW(window_root), PROGRAMNAME);
-  gtk_widget_set_name(window_root, DHARMA_MAINWINDOW_WIDGET_NAME);
-  g_signal_connect(window_root, "destroy", G_CALLBACK(gtk_main_quit), (gpointer) window_root);
-  gtk_window_set_position(GTK_WINDOW(window_root), GTK_WIN_POS_CENTER);
-  gtk_container_set_border_width(GTK_CONTAINER(window_root), 0);
-  gtk_window_set_default_size(GTK_WINDOW(window_root), 1200, 800);
-
-  gtk_widget_show_all(window_root);
-  gtk_main();
-  return 0;
+  return base;
 }

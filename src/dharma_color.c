@@ -17,25 +17,19 @@
  *
  */
 
-#include <gtk/gtk.h>
-
-#include <stdio.h>
-
-#include <dharma_defines.h>
+#include <dharma_color.h>
 #include <dharma_math.h>
 
-int main(int argc, char *argv[]){
-  gtk_init(&argc, &argv);
+bool color_matches_stride(uint64_t color, uint32_t stride){
+  //Stride bigger than 8 overflows uint64_t
+  if (stride > 8){
+    return false;
+  }
 
-  GtkWidget *window_root = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title(GTK_WINDOW(window_root), PROGRAMNAME);
-  gtk_widget_set_name(window_root, DHARMA_MAINWINDOW_WIDGET_NAME);
-  g_signal_connect(window_root, "destroy", G_CALLBACK(gtk_main_quit), (gpointer) window_root);
-  gtk_window_set_position(GTK_WINDOW(window_root), GTK_WIN_POS_CENTER);
-  gtk_container_set_border_width(GTK_CONTAINER(window_root), 0);
-  gtk_window_set_default_size(GTK_WINDOW(window_root), 1200, 800);
+  //Max color acceptable is 2^(stride*8)
+  if (color > dharma_math_uint_pow(2, stride*8)){
+      return false;
+  }
 
-  gtk_widget_show_all(window_root);
-  gtk_main();
-  return 0;
+  return true;
 }

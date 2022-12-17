@@ -17,25 +17,26 @@
  *
  */
 
-#include <gtk/gtk.h>
+#include <stdlib.h>
 
-#include <stdio.h>
+#include <dharma_image.h>
 
-#include <dharma_defines.h>
-#include <dharma_math.h>
+typedef struct D_Image {
+  uint32_t w;
+  uint32_t h;
+  uint32_t stride;
 
-int main(int argc, char *argv[]){
-  gtk_init(&argc, &argv);
+  unsigned char *data;
+} D_Image;
 
-  GtkWidget *window_root = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title(GTK_WINDOW(window_root), PROGRAMNAME);
-  gtk_widget_set_name(window_root, DHARMA_MAINWINDOW_WIDGET_NAME);
-  g_signal_connect(window_root, "destroy", G_CALLBACK(gtk_main_quit), (gpointer) window_root);
-  gtk_window_set_position(GTK_WINDOW(window_root), GTK_WIN_POS_CENTER);
-  gtk_container_set_border_width(GTK_CONTAINER(window_root), 0);
-  gtk_window_set_default_size(GTK_WINDOW(window_root), 1200, 800);
+D_Image *dharma_image_new_empty(uint32_t w, uint32_t h, uint32_t stride){
+  D_Image *im = malloc(sizeof(D_Image));
 
-  gtk_widget_show_all(window_root);
-  gtk_main();
-  return 0;
+  im->w = w;
+  im->h = h;
+  im->stride = stride;
+
+  im->data = calloc(w * h * stride, 1);
+
+  return im;
 }
