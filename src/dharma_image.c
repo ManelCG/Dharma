@@ -35,7 +35,7 @@ typedef struct D_Image {
   uint32_t h;
   uint32_t bpp;
 
-  unsigned char *data;
+  uint8_t *data;
 } D_Image;
 
 /***************
@@ -106,22 +106,22 @@ uint32_t dharma_image_get_Bpp(D_Image *im){
   return im->bpp / 8;
 }
 
-unsigned char *dharma_image_get_data(D_Image *im){
+uint8_t *dharma_image_get_data(D_Image *im){
   return im->data;
 }
-const unsigned char *dharma_image_get_data_cnt(D_Image *im){
-  return (const unsigned char *) im->data;
+const uint8_t *dharma_image_get_data_cnt(D_Image *im){
+  return (const uint8_t *) im->data;
 }
-unsigned char *dharma_image_get_pixel(D_Image *im, uint32_t x, uint32_t y){
+uint8_t *dharma_image_get_pixel(D_Image *im, uint32_t x, uint32_t y){
   return &(im->data[im->bpp * (im->w * y + x)/8]);
 }
-const unsigned char *dharma_image_get_pixel_cnt(D_Image *im, uint32_t x, uint32_t y){
-  return (const unsigned char *) &(im->data[im->bpp * (im->w * y + x)/8]);
+const uint8_t *dharma_image_get_pixel_cnt(D_Image *im, uint32_t x, uint32_t y){
+  return (const uint8_t *) &(im->data[im->bpp * (im->w * y + x)/8]);
 }
 
 bool dharma_image_set_pixel_from_uint64(D_Image *im, uint32_t x, uint32_t y, uint64_t color){
   uint32_t Bpp = im->bpp / 8;
-  unsigned char color_array[Bpp];
+  uint8_t color_array[Bpp];
 
   if (!color_matches_bpp(color, im->bpp)){
     return false;
@@ -132,7 +132,13 @@ bool dharma_image_set_pixel_from_uint64(D_Image *im, uint32_t x, uint32_t y, uin
   memcpy(&im->data[(y*im->w + x) * Bpp], color_array, Bpp);
   return true;
 }
-bool dharma_image_set_pixel_from_array(D_Image *im, uint32_t x, uint32_t y, const unsigned char *array){
+bool dharma_image_set_pixel_from_1Barray(D_Image *im, uint32_t x, uint32_t y, const uint8_t *array){
+  uint32_t Bpp = im->bpp / 8;
+
+  memcpy(&im->data[(y*im->w + x) * Bpp], array, Bpp);
+  return true;
+}
+bool dharma_image_set_pixel_from_2Barray(D_Image *im, uint32_t x, uint32_t y, const uint16_t *array){
   uint32_t Bpp = im->bpp / 8;
 
   memcpy(&im->data[(y*im->w + x) * Bpp], array, Bpp);
@@ -142,7 +148,7 @@ bool dharma_image_set_pixel_from_array(D_Image *im, uint32_t x, uint32_t y, cons
 bool dharma_image_fill_canvas(D_Image *im, uint64_t color){
   uint32_t i;
   uint32_t Bpp = im->bpp/8;
-  unsigned char color_array[Bpp];
+  uint8_t color_array[Bpp];
 
   if (!color_matches_bpp(color, im->bpp)){
     return false;
@@ -175,7 +181,7 @@ void dharma_image_print(D_Image *im){
 bool dharma_image_fill_canvas_sequential(D_Image *im){
   uint32_t i;
   uint32_t Bpp = im->bpp/8;
-  unsigned char color_array[Bpp];
+  uint8_t color_array[Bpp];
 
   for (i = 0; i < im->w * im->h; i++){
     color_uint64_to_1Barray(i, color_array, Bpp);

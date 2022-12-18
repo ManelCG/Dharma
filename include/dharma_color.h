@@ -28,7 +28,9 @@ bool color_matches_Bpp(uint64_t color, uint32_t Bpp);
 bool color_matches_bpp(uint64_t color, uint32_t bpp);
 
 //Transform a color int to an array of bytes and backwards
-bool color_uint64_to_1Barray(uint64_t color, unsigned char *array, uint32_t Bpp);
-uint64_t color_1Barray_to_uint64(const unsigned char *array, uint32_t Bpp);
+bool color_uint64_to_1Barray(uint64_t color, uint8_t *array, uint32_t Bpp);
+uint64_t color_1Barray_to_uint64(const uint8_t *array, uint32_t Bpp);
+bool color_uint64_to_2Barray(uint64_t color, uint16_t *array, uint32_t Bpp);
+uint64_t color_2Barray_to_uint64(const uint16_t *array, uint32_t Bpp);
 
 #endif //_DHARMA_COLOR_H_

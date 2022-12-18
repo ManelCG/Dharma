@@ -38,7 +38,7 @@ bool color_matches_bpp(uint64_t color, uint32_t bpp){
   return true;
 }
 
-bool color_uint64_to_1Barray(uint64_t color, unsigned char *array, uint32_t Bpp){
+bool color_uint64_to_1Barray(uint64_t color, uint8_t *array, uint32_t Bpp){
   uint32_t i;
   uint64_t color_offset;
 
@@ -54,13 +54,41 @@ bool color_uint64_to_1Barray(uint64_t color, unsigned char *array, uint32_t Bpp)
 
   return true;
 }
+bool color_uint64_to_2Barray(uint64_t color, uint16_t *array, uint32_t Bpp){
+  uint32_t i;
+  uint64_t color_offset;
 
-uint64_t color_1Barray_to_uint64(const unsigned char *array, uint32_t Bpp){
+  if (! color_matches_Bpp(color, Bpp)){
+    return false;
+  }
+
+  color_offset = color;
+  for (i = 0; i < Bpp; i++){
+    array[Bpp-i-1] = color_offset & 0xFFFF;
+    color_offset >>= 16;
+  }
+
+  return true;
+}
+
+uint64_t color_1Barray_to_uint64(const uint8_t *array, uint32_t Bpp){
   uint32_t i;
   uint64_t color = 0;
 
   for (i = 0; i < Bpp; i++){
     color <<= 8;
+    color += array[i];
+  }
+
+  return color;
+}
+
+uint64_t color_2Barray_to_uint64(const uint16_t *array, uint32_t Bpp){
+  uint32_t i;
+  uint64_t color = 0;
+
+  for (i = 0; i < Bpp; i++){
+    color <<= 16;
     color += array[i];
   }
 

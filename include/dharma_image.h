@@ -40,13 +40,14 @@ uint32_t dharma_image_get_height(D_Image *im);
 uint32_t dharma_image_get_bpp(D_Image *im);
 uint32_t dharma_image_get_Bpp(D_Image *im);
 
-unsigned char *dharma_image_get_data(D_Image *im);
-const unsigned char *dharma_image_get_data_cnt(D_Image *im);
-unsigned char *dharma_image_get_pixel(D_Image *im, uint32_t x, uint32_t y);
-const unsigned char *dharma_image_get_pixel_cnt(D_Image *im, uint32_t x, uint32_t y);
+uint8_t *dharma_image_get_data(D_Image *im);
+const uint8_t *dharma_image_get_data_cnt(D_Image *im);
+uint8_t *dharma_image_get_pixel(D_Image *im, uint32_t x, uint32_t y);
+const uint8_t *dharma_image_get_pixel_cnt(D_Image *im, uint32_t x, uint32_t y);
 
 bool dharma_image_set_pixel_from_uint64(D_Image *im, uint32_t x, uint32_t y, uint64_t color);
-bool dharma_image_set_pixel_from_array(D_Image *im, uint32_t x, uint32_t y, const unsigned char *array);
+bool dharma_image_set_pixel_from_1Barray(D_Image *im, uint32_t x, uint32_t y, const uint8_t *array);
+bool dharma_image_set_pixel_from_2Barray(D_Image *im, uint32_t x, uint32_t y, const uint16_t *array);
 
 //Image operations
 bool dharma_image_fill_canvas(D_Image *im, uint64_t color);
