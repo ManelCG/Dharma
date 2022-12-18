@@ -22,4 +22,36 @@
 
 #define DHARMA_MAINWINDOW_WIDGET_NAME "Dharma Main Window"
 
+/*******************
+ *
+ * COLOR DEFINITIONS
+ *
+ * *****************/
+
+#define DHARMA_BLACK           0x0
+#define DHARMA_BLACK_8B        0x0
+#define DHARMA_BLACK_24B       0x0
+#define DHARMA_BLACK_32B       0x000000FF
+#define DHARMA_BLACK_64B       0x000000000000FFFF
+
+#define DHARMA_WHITE_8B        0xFF
+#define DHARMA_WHITE_24B       0xFFFFFF
+#define DHARMA_WHITE_32B       0xFFFFFFFF
+#define DHARMA_WHITE_64B       0xFFFFFFFFFFFFFFFF
+
+#define DHARMA_TRANSPARENT_32B 0x0
+#define DHARMA_TRANSPARENT_64B 0x0
+
+#define DHARMA_RED_24B         0xFF0000
+#define DHARMA_RED_32B         0xFF000000
+#define DHARMA_RED_64B         0xFFFF000000000000
+
+#define DHARMA_GREEN_24B       0x00FF00
+#define DHARMA_GREEN_32B       0x00FF0000
+#define DHARMA_GREEN_64B       0x0000FFFF00000000
+
+#define DHARMA_BLUE_24B        0x0000FF
+#define DHARMA_BLUE_32B        0x0000FF00
+#define DHARMA_BLUE_64B        0x00000000FFFF0000
+
 #endif //_DHARMA_DEFINES_H_
