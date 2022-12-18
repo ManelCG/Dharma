@@ -63,7 +63,7 @@ bool color_uint64_to_2Barray(uint64_t color, uint16_t *array, uint32_t Bpp){
   }
 
   color_offset = color;
-  for (i = 0; i < Bpp; i++){
+  for (i = 0; i < Bpp/2; i++){
     array[Bpp-i-1] = color_offset & 0xFFFF;
     color_offset >>= 16;
   }
