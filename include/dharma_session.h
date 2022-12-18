@@ -44,6 +44,8 @@ uint32_t dharma_session_get_height(D_Session *s);
 uint32_t dharma_session_get_bpp(D_Session *s);
 uint32_t dharma_session_get_Bpp(D_Session *s);
 
+D_Image *dharma_session_get_layer(D_Session *s, uint32_t layer);
+
 const char *dharma_session_get_filename(D_Session *s);
 bool dharma_session_set_filename(D_Session *s, const char *name);
 

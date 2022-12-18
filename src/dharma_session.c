@@ -163,6 +163,14 @@ uint32_t dharma_session_get_Bpp(D_Session *s){
   return s->bpp/8;
 }
 
+D_Image *dharma_session_get_layer(D_Session *s, uint32_t layer){
+  if (layer >= s->nlayers){
+    return NULL;
+  }
+
+  return s->layers[layer];
+}
+
 //Gets the file name, or a placeholder if filename is NULL
 const char *dharma_session_get_filename(D_Session *s){
   if (s->filename == NULL){

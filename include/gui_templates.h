@@ -19,11 +19,16 @@
 
 #include <gtk/gtk.h>
 
+#include <dharma_session.h>
+
 #ifndef __GUI_TEMPLATES_H_
 #define __GUI_TEMPLATES_H_
 
 //Gui elements constructors
 GtkWidget *gui_templates_get_mainscreen_menubar();
+GtkWidget *gui_templates_get_sessions_notebook();
+GtkWidget *gui_templates_get_welcome_screen_box();
+GtkWidget *gui_templates_get_canvas_from_session(D_Session *s);
 
 //Helper functions
 void gui_templates_clear_container(GtkWidget *container);

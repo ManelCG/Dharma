@@ -35,10 +35,15 @@ void draw_main_window(GtkWidget *window, gpointer data){
   GtkWidget *main_vbox; //Contains the menubar and the rest of the widgets
 
   GtkWidget *menu_menubar;
+  GtkWidget *notebook_sessions;
+
+  notebook_sessions = gui_templates_get_sessions_notebook();
 
   main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   menu_menubar = gui_templates_get_mainscreen_menubar();
   gtk_box_pack_start(GTK_BOX(main_vbox), menu_menubar, false, false, 0);
+
+  gtk_box_pack_start(GTK_BOX(main_vbox), notebook_sessions, true, true, 0);
 
   gtk_container_add(GTK_CONTAINER(window), main_vbox);
   gtk_widget_show_all(window);
@@ -47,30 +52,24 @@ void draw_main_window(GtkWidget *window, gpointer data){
 int main(int argc, char *argv[]){
   gtk_init(&argc, &argv);
 
-  D_Session *s = dharma_session_new(4, 16, 64);
-  D_Image *im = dharma_image_new_empty(4, 16, 64);
+  D_Session *s = dharma_session_new(200, 500, 32);
+  D_Image *im = dharma_image_new_empty(200, 500, 32);
+  D_Image *firstlayer = dharma_session_get_layer(s, 0);
+  dharma_image_fill_canvas(firstlayer, DHARMA_RED_32B);
   printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
   printf("%s\n", dharma_session_add_layer_from_image(s, im) == true? "Success" : "Failure");
-
   dharma_session_set_filename(s, "test.png");
-
-  dharma_session_remove_layer(s, 0);
-  dharma_session_remove_layer(s, 0);
-  dharma_session_remove_layer(s, 0);
-
   printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
   printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
   printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
 
   dharma_session_new(1920, 1080, 32);
-  dharma_session_new(1280, 720, 32);
-  dharma_session_new(1, 2, 32);
-  dharma_session_new(420, 69, 32);
+  dharma_session_new(1280, 720, 24);
+  dharma_session_new(1, 2, 24);
+  dharma_session_new(420, 69, 24);
   dharma_session_new(438, 793, 32);
 
-  dharma_sessions_print_all();
-
-  dharma_sessions_destroy_all();
+  // dharma_sessions_destroy_all();
 
   dharma_sessions_print_all();
 
