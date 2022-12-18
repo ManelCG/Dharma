@@ -18,6 +18,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <dharma_image.h>
@@ -40,6 +41,27 @@ D_Image *dharma_image_new_empty(uint32_t w, uint32_t h, uint32_t bpp){
   im->bpp = bpp;
 
   im->data = calloc(w * h * bpp, 1);
+
+  return im;
+}
+
+D_Image *dharma_image_new_blank(uint32_t w, uint32_t h, uint32_t bpp){
+  D_Image *im = dharma_image_new_empty(w, h, bpp);
+
+  switch(bpp){
+    case 8:
+      dharma_image_fill_canvas(im, 0xFF);
+      break;
+    case 24:
+      dharma_image_fill_canvas(im, 0xFFFFFF);
+      break;
+    case 32:
+      dharma_image_fill_canvas(im, 0xFFFFFFFF);
+      break;
+    case 64:
+      dharma_image_fill_canvas(im, 0xFFFFFFFFFFFFFFFF);
+      break;
+  }
 
   return im;
 }
@@ -108,3 +130,32 @@ bool dharma_image_fill_canvas(D_Image *im, uint64_t color){
 
   return true;
 }
+
+//Debug tools
+void dharma_image_print(D_Image *im){
+  uint32_t Bpp = im->bpp / 8;
+  uint32_t i, j, k;
+
+  for (i = 0; i < im->h; i++){
+  for (j = 0; j < im->w; j++){
+    for (k = 0; k < Bpp; k++){
+      printf("%0*x", 2, im->data[(i*im->w + j)*Bpp + k]);
+    }
+    printf(" ");
+  }
+  printf("\n");
+  }
+}
+bool dharma_image_fill_canvas_sequential(D_Image *im){
+  uint32_t i;
+  uint32_t Bpp = im->bpp/8;
+  unsigned char color_array[Bpp];
+
+  for (i = 0; i < im->w * im->h; i++){
+    color_uint64_to_1Barray(i, color_array, Bpp);
+    memcpy(&im->data[i*Bpp], color_array, Bpp);
+  }
+
+  return true;
+}
+

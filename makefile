@@ -8,7 +8,7 @@ IDIR = include
 LOCALENAME = $(BASENAME)
 
 CCCMD = gcc
-CFLAGS = -I$(IDIR) `pkg-config --cflags --libs gtk+-3.0` -Wall -Wno-deprecated-declarations -DLOCALE_=\"$(LOCALENAME)\" -pthread -DPROGRAMNAME=\"$(PROGRAMNAME)\"
+CFLAGS = -I$(IDIR) `pkg-config --cflags --libs gtk+-3.0` -Wall -Wextra -Wpedantic -Wno-deprecated-declarations -DLOCALE_=\"$(LOCALENAME)\" -pthread -DPROGRAMNAME=\"$(PROGRAMNAME)\"
 
 debug: CC = $(CCCMD) -DDEBUG_ALL -DVERSION=\"$(VERSION)_DEBUG\"
 debug: BDIR = build
@@ -33,10 +33,10 @@ LDIR=lib
 
 LIBS = -lm -lpthread
 
-_DEPS = dharma_defines.h dharma_image.h dharma_color.h dharma_math.h
+_DEPS = dharma_defines.h dharma_image.h dharma_color.h dharma_math.h dharma_session.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = dharma.o dharma_image.o dharma_color.o dharma_math.o
+_OBJ = dharma.o dharma_image.o dharma_color.o dharma_math.o dharma_session.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 WOBJ = $(patsubst %,$(WODIR)/%,$(_OBJ))
 DOBJ = $(patsubst %,$(DODIR)/%,$(_OBJ))

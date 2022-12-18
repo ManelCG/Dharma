@@ -19,21 +19,27 @@
 
 #include <dharma_color.h>
 #include <dharma_math.h>
+#include <math.h>
 
 bool color_matches_Bpp(uint64_t color, uint32_t Bpp){
   return color_matches_bpp(color, Bpp*8);
 }
 
 bool color_matches_bpp(uint64_t color, uint32_t bpp){
-  //Allow for 4Bpp max
-  if (bpp > 32){
+  //Allow for 8Bpp max
+  if (bpp > 64){
     return false;
   }
 
-  //Max color acceptable is 2^(bpp*8)
-  if (color > dharma_math_uint_pow(2, bpp)){
+  if (log2f(color) > bpp){
     return false;
   }
+
+  ////Max color acceptable is 2^(bpp*8)
+  //if (color > dharma_math_uint_pow(2, bpp)){
+  //  printf("Here\n");
+  //  return false;
+  //}
 
   return true;
 }

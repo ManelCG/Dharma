@@ -23,10 +23,13 @@
 #ifndef __DHARMA_IMAGE_H_
 #define __DHARMA_IMAGE_H_
 
+enum {D_Image_Mono, D_Image_RGB, D_Image_ARGB};
+
 typedef struct D_Image D_Image;
 
 //Constructors
 D_Image *dharma_image_new_empty(uint32_t w, uint32_t h, uint32_t bpp);
+D_Image *dharma_image_new_blank(uint32_t w, uint32_t h, uint32_t bpp);
 
 //Getters
 uint32_t dharma_image_get_width(D_Image *im);
@@ -44,5 +47,9 @@ bool dharma_image_set_pixel_from_array(D_Image *im, uint32_t x, uint32_t y, cons
 
 //Image operations
 bool dharma_image_fill_canvas(D_Image *im, uint64_t color);
+
+//Debug tools
+void dharma_image_print(D_Image *im);
+bool dharma_image_fill_canvas_sequential(D_Image *im);
 
 #endif //_DHARMA_IMAGE_H_
