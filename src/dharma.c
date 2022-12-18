@@ -28,12 +28,14 @@
 #include <dharma_session.h>
 
 int main(int argc, char *argv[]){
-  gtk_init(&argc, &argv);
+  // gtk_init(&argc, &argv);
 
   D_Session *s = dharma_session_new(4, 16, 64);
   D_Image *im = dharma_image_new_empty(4, 16, 64);
   printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
   printf("%s\n", dharma_session_add_layer_from_image(s, im) == true? "Success" : "Failure");
+
+  dharma_session_set_filename(s, "test.png");
 
   dharma_session_remove_layer(s, 0);
   dharma_session_remove_layer(s, 0);
@@ -55,15 +57,15 @@ int main(int argc, char *argv[]){
 
   dharma_sessions_print_all();
 
-  GtkWidget *window_root = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title(GTK_WINDOW(window_root), PROGRAMNAME);
-  gtk_widget_set_name(window_root, DHARMA_MAINWINDOW_WIDGET_NAME);
-  g_signal_connect(window_root, "destroy", G_CALLBACK(gtk_main_quit), (gpointer) window_root);
-  gtk_window_set_position(GTK_WINDOW(window_root), GTK_WIN_POS_CENTER);
-  gtk_container_set_border_width(GTK_CONTAINER(window_root), 0);
-  gtk_window_set_default_size(GTK_WINDOW(window_root), 1200, 800);
+  // GtkWidget *window_root = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  // gtk_window_set_title(GTK_WINDOW(window_root), PROGRAMNAME);
+  // gtk_widget_set_name(window_root, DHARMA_MAINWINDOW_WIDGET_NAME);
+  // g_signal_connect(window_root, "destroy", G_CALLBACK(gtk_main_quit), (gpointer) window_root);
+  // gtk_window_set_position(GTK_WINDOW(window_root), GTK_WIN_POS_CENTER);
+  // gtk_container_set_border_width(GTK_CONTAINER(window_root), 0);
+  // gtk_window_set_default_size(GTK_WINDOW(window_root), 1200, 800);
 
-  gtk_widget_show_all(window_root);
-  gtk_main();
+  // gtk_widget_show_all(window_root);
+  // gtk_main();
   return 0;
 }

@@ -32,6 +32,9 @@ bool dharma_session_destroy_from_id(uint32_t id);
 bool dharma_session_destroy(D_Session *s);
 bool dharma_sessions_destroy_all();
 
+const char *dharma_session_get_filename(D_Session *s);
+bool dharma_session_set_filename(D_Session *s, const char *name);
+
 bool dharma_session_is_image_valid(D_Session *s, D_Image *im);
 
 bool dharma_session_add_layer_from_image(D_Session *s, D_Image *im);
