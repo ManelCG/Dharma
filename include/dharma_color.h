@@ -23,9 +23,11 @@
 #ifndef __DHARMA_COLOR_H_
 #define __DHARMA_COLOR_H_
 
+//Checks if color is a valid color for the given Bpp / bpp
 bool color_matches_Bpp(uint64_t color, uint32_t Bpp);
 bool color_matches_bpp(uint64_t color, uint32_t bpp);
 
+//Transform a color int to an array of bytes and backwards
 bool color_uint64_to_1Barray(uint64_t color, unsigned char *array, uint32_t Bpp);
 uint64_t color_1Barray_to_uint64(const unsigned char *array, uint32_t Bpp);
 

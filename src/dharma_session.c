@@ -131,6 +131,7 @@ bool dharma_sessions_destroy_all(){
   return true;
 }
 
+//Checks if D_Image im can be a valid layer for D_Session s.
 bool dharma_session_is_image_valid(D_Session *s, D_Image *im){
   if (dharma_image_get_width(im) != s->w){
     return false;
@@ -145,11 +146,14 @@ bool dharma_session_is_image_valid(D_Session *s, D_Image *im){
   return true;
 }
 
+//Adds a new layer to D_Session s, which is D_Image im.
 bool dharma_session_add_layer_from_image(D_Session *s, D_Image *im){
+  //Check if the image is valid for the session
   if (!dharma_session_is_image_valid(s, im)){
     return false;
   }
 
+  //Allocate space for new image and add it.
   s->nlayers++;
   if (s->layers != NULL){
     s->layers = realloc(s->layers, sizeof(D_Image *) * s->nlayers);
@@ -161,31 +165,43 @@ bool dharma_session_add_layer_from_image(D_Session *s, D_Image *im){
 
   return true;
 }
+//Creates a new empty image and adds it as layer to D_Session s.
+bool dharma_session_add_layer(D_Session *s){
+  D_Image *im = dharma_image_new_empty(s->w, s->h, s->bpp);
+  return dharma_session_add_layer_from_image(s, im);
+}
 
+//Removes the layer [index] from the session D_Session s.
 bool dharma_session_remove_layer(D_Session *s, uint32_t index){
   uint32_t i;
   D_Image **new_layers;
   D_Image *im;
 
+  //Check if index overflows s->layers
   if (index >= s->nlayers){
     return false;
   }
 
+  //Save pointer to the layer to be destroyed
   im = s->layers[index];
 
+  //Offset to the left all layers after our target
   for (i = index+1; i < s->nlayers; i++){
     s->layers[i-1] = s->layers[i];
   }
   s->nlayers--;
 
+  //Destroy all memory from the target layer
   dharma_image_destroy(im);
 
+  //If it was the last layer in the session, set layer vector as NULL
   if (s->nlayers == 0){
     free(s->layers);
     s->layers = NULL;
     return true;
   }
 
+  //Reallocate new vector for layers and copy the old one.
   new_layers = malloc(sizeof(D_Image *) * s->nlayers);
   for (i = 0; i < s->nlayers; i++){
     new_layers[i] = s->layers[i];
@@ -195,11 +211,7 @@ bool dharma_session_remove_layer(D_Session *s, uint32_t index){
   return true;
 }
 
-bool dharma_session_add_layer(D_Session *s){
-  D_Image *im = dharma_image_new_empty(s->w, s->h, s->bpp);
-  return dharma_session_add_layer_from_image(s, im);
-}
-
+//Gets the file name, or a placeholder if filename is NULL
 const char *dharma_session_get_filename(D_Session *s){
   if (s->filename == NULL){
     return "Unnamed file";
@@ -207,6 +219,8 @@ const char *dharma_session_get_filename(D_Session *s){
     return s->filename;
   }
 }
+
+//Sets the filename for the session. If an old filename already existed, it is safely freed.
 bool dharma_session_set_filename(D_Session *s, const char *name){
   if (name == NULL){
     return false;

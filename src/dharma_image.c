@@ -24,6 +24,12 @@
 #include <dharma_image.h>
 #include <dharma_color.h>
 
+/*********************
+ *
+ * Struct deffinitions
+ *
+ *********************/
+
 typedef struct D_Image {
   uint32_t w;
   uint32_t h;
@@ -32,7 +38,13 @@ typedef struct D_Image {
   unsigned char *data;
 } D_Image;
 
-//Constructor
+/***************
+ *
+ * Constructors
+ *
+ ***************/
+
+//Creates a new image with an empty canvas
 D_Image *dharma_image_new_empty(uint32_t w, uint32_t h, uint32_t bpp){
   D_Image *im = malloc(sizeof(D_Image));
 
@@ -45,6 +57,7 @@ D_Image *dharma_image_new_empty(uint32_t w, uint32_t h, uint32_t bpp){
   return im;
 }
 
+//Creates a new image with a white canvas.
 D_Image *dharma_image_new_blank(uint32_t w, uint32_t h, uint32_t bpp){
   D_Image *im = dharma_image_new_empty(w, h, bpp);
 

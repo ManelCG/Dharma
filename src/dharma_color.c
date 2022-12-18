@@ -35,12 +35,6 @@ bool color_matches_bpp(uint64_t color, uint32_t bpp){
     return false;
   }
 
-  ////Max color acceptable is 2^(bpp*8)
-  //if (color > dharma_math_uint_pow(2, bpp)){
-  //  printf("Here\n");
-  //  return false;
-  //}
-
   return true;
 }
 
