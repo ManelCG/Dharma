@@ -21,8 +21,10 @@
 
 #include <stdio.h>
 
+#include <dharma_image.h>
 #include <dharma_defines.h>
 #include <dharma_math.h>
+#include <dharma_color.h>
 
 int main(int argc, char *argv[]){
   gtk_init(&argc, &argv);

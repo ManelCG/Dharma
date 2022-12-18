@@ -20,16 +20,49 @@
 #include <dharma_color.h>
 #include <dharma_math.h>
 
-bool color_matches_stride(uint64_t color, uint32_t stride){
-  //Stride bigger than 8 overflows uint64_t
-  if (stride > 8){
+bool color_matches_Bpp(uint64_t color, uint32_t Bpp){
+  return color_matches_bpp(color, Bpp*8);
+}
+
+bool color_matches_bpp(uint64_t color, uint32_t bpp){
+  //Allow for 4Bpp max
+  if (bpp > 32){
     return false;
   }
 
-  //Max color acceptable is 2^(stride*8)
-  if (color > dharma_math_uint_pow(2, stride*8)){
-      return false;
+  //Max color acceptable is 2^(bpp*8)
+  if (color > dharma_math_uint_pow(2, bpp)){
+    return false;
   }
 
   return true;
+}
+
+bool color_uint64_to_1Barray(uint64_t color, unsigned char *array, uint32_t Bpp){
+  uint32_t i;
+  uint64_t color_offset;
+
+  if (! color_matches_Bpp(color, Bpp)){
+    return false;
+  }
+
+  color_offset = color;
+  for (i = 0; i < Bpp; i++){
+    array[Bpp-i-1] = color_offset & 0xFF;
+    color_offset >>= 8;
+  }
+
+  return true;
+}
+
+uint64_t color_1Barray_to_uint64(const unsigned char *array, uint32_t Bpp){
+  uint32_t i;
+  uint64_t color = 0;
+
+  for (i = 0; i < Bpp; i++){
+    color <<= 8;
+    color += array[i];
+  }
+
+  return color;
 }

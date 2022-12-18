@@ -20,7 +20,7 @@
 #include <dharma_math.h>
 
 uint64_t dharma_math_uint_pow(uint32_t a, uint32_t b){
-  uint32_t base = 1;
+  uint64_t base = 1;
   for (; b > 0; b--){
     base*=a;
   }

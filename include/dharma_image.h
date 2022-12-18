@@ -18,12 +18,31 @@
  */
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifndef __DHARMA_IMAGE_H_
 #define __DHARMA_IMAGE_H_
 
 typedef struct D_Image D_Image;
 
-D_Image *dharma_image_new_empty(uint32_t w, uint32_t h, uint32_t stride);
+//Constructors
+D_Image *dharma_image_new_empty(uint32_t w, uint32_t h, uint32_t bpp);
+
+//Getters
+uint32_t dharma_image_get_width(D_Image *im);
+uint32_t dharma_image_get_height(D_Image *im);
+uint32_t dharma_image_get_bpp(D_Image *im);
+uint32_t dharma_image_get_Bpp(D_Image *im);
+
+unsigned char *dharma_image_get_data(D_Image *im);
+const unsigned char *dharma_image_get_data_cnt(D_Image *im);
+unsigned char *dharma_image_get_pixel(D_Image *im, uint32_t x, uint32_t y);
+const unsigned char *dharma_image_get_pixel_cnt(D_Image *im, uint32_t x, uint32_t y);
+
+bool dharma_image_set_pixel_from_uint64(D_Image *im, uint32_t x, uint32_t y, uint64_t color);
+bool dharma_image_set_pixel_from_array(D_Image *im, uint32_t x, uint32_t y, const unsigned char *array);
+
+//Image operations
+bool dharma_image_fill_canvas(D_Image *im, uint64_t color);
 
 #endif //_DHARMA_IMAGE_H_
