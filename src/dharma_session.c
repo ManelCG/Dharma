@@ -131,20 +131,73 @@ bool dharma_sessions_destroy_all(){
   return true;
 }
 
-//Checks if D_Image im can be a valid layer for D_Session s.
-bool dharma_session_is_image_valid(D_Session *s, D_Image *im){
-  if (dharma_image_get_width(im) != s->w){
-    return false;
+/*********
+ *
+ * GETTERS
+ *
+ *********/
+
+D_Session *dharma_session_get_session_from_id(uint32_t id){
+  if (id >= nsessions){
+    return NULL;
   }
-  if (dharma_image_get_height(im) != s->h){
-    return false;
+  return sessions[id];
+}
+uint32_t dharma_session_get_nsessions(){
+  return nsessions;
+}
+const D_Session **dharma_session_get_sessions(){
+  return (const D_Session **) sessions;
+}
+
+uint32_t dharma_session_get_width(D_Session *s){
+  return s->w;
+}
+uint32_t dharma_session_get_height(D_Session *s){
+  return s->h;
+}
+uint32_t dharma_session_get_bpp(D_Session *s){
+  return s->bpp;
+}
+uint32_t dharma_session_get_Bpp(D_Session *s){
+  return s->bpp/8;
+}
+
+//Gets the file name, or a placeholder if filename is NULL
+const char *dharma_session_get_filename(D_Session *s){
+  if (s->filename == NULL){
+    return "Unnamed file";
+  } else {
+    return s->filename;
   }
-  if (dharma_image_get_bpp(im) != s->bpp){
+}
+
+/*********
+ *
+ * SETTERS
+ *
+ *********/
+
+//Sets the filename for the session. If an old filename already existed, it is safely freed.
+bool dharma_session_set_filename(D_Session *s, const char *name){
+  if (name == NULL){
     return false;
   }
 
+  if (s->filename != NULL){
+    free(s->filename);
+  }
+
+  s->filename = malloc(name[0] * (strlen(name) + 1));
+  strcpy(s->filename, name);
   return true;
 }
+
+/********************
+ *
+ * LAYER MANIPULATION
+ *
+ ********************/
 
 //Adds a new layer to D_Session s, which is D_Image im.
 bool dharma_session_add_layer_from_image(D_Session *s, D_Image *im){
@@ -211,31 +264,34 @@ bool dharma_session_remove_layer(D_Session *s, uint32_t index){
   return true;
 }
 
-//Gets the file name, or a placeholder if filename is NULL
-const char *dharma_session_get_filename(D_Session *s){
-  if (s->filename == NULL){
-    return "Unnamed file";
-  } else {
-    return s->filename;
-  }
-}
+/***********************
+ *
+ * CHECKS AND ASSERTIONS
+ *
+ ***********************/
 
-//Sets the filename for the session. If an old filename already existed, it is safely freed.
-bool dharma_session_set_filename(D_Session *s, const char *name){
-  if (name == NULL){
+//Checks if D_Image im can be a valid layer for D_Session s.
+bool dharma_session_is_image_valid(D_Session *s, D_Image *im){
+  if (dharma_image_get_width(im) != s->w){
+    return false;
+  }
+  if (dharma_image_get_height(im) != s->h){
+    return false;
+  }
+  if (dharma_image_get_bpp(im) != s->bpp){
     return false;
   }
 
-  if (s->filename != NULL){
-    free(s->filename);
-  }
-
-  s->filename = malloc(name[0] * (strlen(name) + 1));
-  strcpy(s->filename, name);
   return true;
 }
 
-//Debug functions
+
+/*****************
+ *
+ * DEBUG FUNCTIONS
+ *
+ *****************/
+
 void dharma_sessions_print_all(){
   uint32_t i;
   D_Session *s;
