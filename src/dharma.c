@@ -25,9 +25,35 @@
 #include <dharma_defines.h>
 #include <dharma_math.h>
 #include <dharma_color.h>
+#include <dharma_session.h>
 
 int main(int argc, char *argv[]){
   gtk_init(&argc, &argv);
+
+  D_Session *s = dharma_session_new(4, 16, 64);
+  D_Image *im = dharma_image_new_empty(4, 16, 64);
+  printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
+  printf("%s\n", dharma_session_add_layer_from_image(s, im) == true? "Success" : "Failure");
+
+  dharma_session_remove_layer(s, 0);
+  dharma_session_remove_layer(s, 0);
+  dharma_session_remove_layer(s, 0);
+
+  printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
+  printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
+  printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
+
+  dharma_session_new(1920, 1080, 32);
+  dharma_session_new(1280, 720, 32);
+  dharma_session_new(1, 2, 32);
+  dharma_session_new(420, 69, 32);
+  dharma_session_new(438, 793, 32);
+
+  dharma_sessions_print_all();
+
+  dharma_sessions_destroy_all();
+
+  dharma_sessions_print_all();
 
   GtkWidget *window_root = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(window_root), PROGRAMNAME);

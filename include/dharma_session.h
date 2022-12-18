@@ -28,9 +28,18 @@ typedef struct D_Session D_Session;
 
 D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp);
 
+bool dharma_session_destroy_from_id(uint32_t id);
+bool dharma_session_destroy(D_Session *s);
+bool dharma_sessions_destroy_all();
+
 bool dharma_session_is_image_valid(D_Session *s, D_Image *im);
 
 bool dharma_session_add_layer_from_image(D_Session *s, D_Image *im);
 bool dharma_session_add_layer(D_Session *s);
+
+bool dharma_session_remove_layer(D_Session *s, uint32_t index);
+
+//Debug functions
+void dharma_sessions_print_all();
 
 #endif //_DHARMA_SESSION_H_

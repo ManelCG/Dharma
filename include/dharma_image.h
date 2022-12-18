@@ -31,6 +31,9 @@ typedef struct D_Image D_Image;
 D_Image *dharma_image_new_empty(uint32_t w, uint32_t h, uint32_t bpp);
 D_Image *dharma_image_new_blank(uint32_t w, uint32_t h, uint32_t bpp);
 
+//Destructors
+bool dharma_image_destroy(D_Image *im);
+
 //Getters
 uint32_t dharma_image_get_width(D_Image *im);
 uint32_t dharma_image_get_height(D_Image *im);

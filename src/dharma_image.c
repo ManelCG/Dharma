@@ -66,6 +66,19 @@ D_Image *dharma_image_new_blank(uint32_t w, uint32_t h, uint32_t bpp){
   return im;
 }
 
+//Destructors
+bool dharma_image_destroy(D_Image *im){
+  if (im == NULL){
+    return false;
+  }
+  if (im->data != NULL){
+    free(im->data);
+  }
+
+  free(im);
+  return true;
+}
+
 //Getters
 uint32_t dharma_image_get_width(D_Image *im){
   return im->w;
