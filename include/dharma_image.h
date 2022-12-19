@@ -55,5 +55,6 @@ bool dharma_image_fill_canvas(D_Image *im, uint64_t color);
 //Debug tools
 void dharma_image_print(D_Image *im);
 bool dharma_image_fill_canvas_sequential(D_Image *im);
+bool dharma_image_fill_canvas_random(D_Image *im);
 
 #endif //_DHARMA_IMAGE_H_

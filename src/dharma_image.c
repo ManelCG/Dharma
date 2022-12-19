@@ -23,6 +23,7 @@
 
 #include <dharma_image.h>
 #include <dharma_color.h>
+#include <dharma_math.h>
 
 /*********************
  *
@@ -191,3 +192,19 @@ bool dharma_image_fill_canvas_sequential(D_Image *im){
   return true;
 }
 
+bool dharma_image_fill_canvas_random(D_Image *im){
+  uint32_t i;
+  uint32_t Bpp = im->bpp/8;
+  uint8_t color_array[Bpp];
+
+  uint64_t max_color = dharma_math_uint_pow(2, im->bpp);
+
+  printf("%ld\n", max_color);
+
+  for (i = 0; i < im->w * im->h; i++){
+    color_uint64_to_1Barray(rand() % max_color, color_array, Bpp);
+    memcpy(&im->data[i*Bpp], color_array, Bpp);
+  }
+
+  return true;
+}

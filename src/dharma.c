@@ -59,18 +59,29 @@ int main(int argc, char *argv[]){
   dharma_image_fill_canvas(firstlayer, DHARMA_RED_32B);
   printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
   printf("%s\n", dharma_session_add_layer_from_image(s, im) == true? "Success" : "Failure");
-  dharma_session_set_filename(s, "test.png");
+  dharma_session_set_filename(s, "Red.png");
   printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
   printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
   printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
 
-  dharma_session_new(1920, 1080, 32);
-  dharma_session_new(1280, 720, 24);
-  D_Session *s2 = dharma_session_new(500, 500, 24);
-  im = dharma_session_get_layer(s2, 0);
+  s = dharma_session_new(1920, 1080, 32);
+  dharma_session_set_filename(s, "1920x1080");
+
+  s = dharma_session_new(1280, 720, 24);
+  dharma_session_set_filename(s, "1280x720");
+
+  s = dharma_session_new(500, 500, 24);
+  im = dharma_session_get_layer(s, 0);
+  dharma_image_fill_canvas_random(im);
+  dharma_session_set_filename(s, "Random");
+
+  s = dharma_session_new(420, 69, 24);
+  im = dharma_session_get_layer(s, 0);
   dharma_image_fill_canvas_sequential(im);
-  dharma_session_new(420, 69, 24);
-  dharma_session_new(438, 793, 32);
+  dharma_session_set_filename(s, "Sequential");
+
+  s = dharma_session_new(438, 793, 32);
+  dharma_session_set_filename(s, "438x793");
 
   // dharma_sessions_destroy_all();
 
