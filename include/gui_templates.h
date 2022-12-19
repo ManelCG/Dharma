@@ -29,8 +29,16 @@ GtkWidget *gui_templates_get_mainscreen_menubar();
 GtkWidget *gui_templates_get_sessions_notebook();
 GtkWidget *gui_templates_get_welcome_screen_box();
 GtkWidget *gui_templates_get_canvas_from_session(D_Session *s);
+GtkWidget *gui_templates_get_viewmode_toolbar(D_Session *s);
+
+GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s);
+GtkWidget *gui_templates_update_gtkimage(D_Session *s);
 
 //Helper functions
 void gui_templates_clear_container(GtkWidget *container);
+
+//Handlers
+void gui_templates_zoomin_button_handler(GtkWidget *w, gpointer d);
+void gui_templates_zoomout_button_handler(GtkWidget *w, gpointer d);
 
 #endif //__GUI_TEMPLATES_H_

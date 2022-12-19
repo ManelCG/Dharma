@@ -79,14 +79,36 @@ GtkWidget *gui_templates_get_welcome_screen_box(){
   return main_vbox;
 }
 
-GtkWidget *gui_templates_get_canvas_from_session(D_Session *s){
+GtkWidget *gui_templates_get_viewmode_toolbar(D_Session *s){
+  GtkWidget *main_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+
+  char scale[8];
+  snprintf(scale, 7, "%.2f", dharma_session_get_scale(s)*100);
+
+  GtkWidget *zoomin_button = gtk_button_new_with_label("+");
+  g_signal_connect(zoomin_button, "pressed", G_CALLBACK(gui_templates_zoomin_button_handler), (gpointer) s);
+  GtkWidget *zoomout_button = gtk_button_new_with_label("-");
+  g_signal_connect(zoomout_button, "pressed", G_CALLBACK(gui_templates_zoomout_button_handler), (gpointer) s);
+
+  GtkWidget *zoom_entry = gtk_entry_new();
+  gtk_entry_set_text(GTK_ENTRY(zoom_entry), scale);
+  gtk_entry_set_width_chars(GTK_ENTRY(zoom_entry), 10);
+
+  gtk_box_pack_end(GTK_BOX(main_hbox), zoom_entry, false, false, 0);
+  gtk_box_pack_end(GTK_BOX(main_hbox), zoomin_button, false, false, 0);
+  gtk_box_pack_end(GTK_BOX(main_hbox), zoomout_button, false, false, 0);
+
+  return main_hbox;
+}
+
+GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s){
   GdkPixbuf *pixbuf = NULL;
-  GtkWidget *image;
-  GtkWidget *scrollbox;
+  GdkPixbuf *pixbuf_scaled = NULL;
 
   D_Image *im = dharma_session_get_layer(s, 0);
   uint8_t *data = dharma_image_get_data(im);
   uint32_t width, height, bpp, stride;
+  float scale = dharma_session_get_scale(s);
 
   width = dharma_image_get_width(im);
   height = dharma_image_get_height(im);
@@ -120,12 +142,52 @@ GtkWidget *gui_templates_get_canvas_from_session(D_Session *s){
       break;
   }
 
+  pixbuf_scaled = gdk_pixbuf_scale_simple(pixbuf, width * scale, height * scale, GDK_INTERP_NEAREST);
+  g_object_unref(pixbuf);
+  return pixbuf_scaled;
+}
+
+GtkWidget *gui_templates_update_gtk_image(D_Session *s){
+  GtkWidget *image = dharma_session_get_gtk_image(s);
+  GdkPixbuf *pixbuf;
+
+  // if (image != NULL){
+  //   g_free(image);
+  // }
+
+  pixbuf = gui_templates_pixbuf_from_session(s);
+
   image = gtk_image_new_from_pixbuf(pixbuf);
+  g_object_unref(pixbuf);
+  dharma_session_set_gtk_image(s, image);
+
+  return image;
+}
+
+GtkWidget *gui_templates_get_canvas_from_session(D_Session *s){
+  GtkWidget *image;
+  GtkWidget *scrollbox;
+
+  image = gui_templates_update_gtk_image(s);
 
   scrollbox = gtk_scrolled_window_new(NULL, NULL);
   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrollbox), image);
 
   return scrollbox;
+}
+
+void gui_templates_pack_box_with_session(D_Session *session, GtkWidget *session_vbox){
+  GtkWidget *session_viewmode_toolbar;
+  GtkWidget *session_canvas;
+
+  session_canvas = gui_templates_get_canvas_from_session(session);
+  gtk_box_pack_start(GTK_BOX(session_vbox), session_canvas, true, true, 0);
+
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+     gtk_box_pack_start(GTK_BOX(session_vbox), separator, false, false, 0);}
+
+  session_viewmode_toolbar = gui_templates_get_viewmode_toolbar(session);
+  gtk_box_pack_start(GTK_BOX(session_vbox), session_viewmode_toolbar, false, false, 0);
 }
 
 GtkWidget *gui_templates_get_sessions_notebook(){
@@ -138,8 +200,6 @@ GtkWidget *gui_templates_get_sessions_notebook(){
   GtkWidget *session_vbox;
   GtkWidget *session_namelabel;
 
-  GtkWidget *session_canvas;
-
   nsessions = dharma_session_get_nsessions();
 
   if (nsessions == 0){
@@ -151,11 +211,10 @@ GtkWidget *gui_templates_get_sessions_notebook(){
     session = dharma_session_get_session_from_id(i);
 
     session_namelabel = gtk_label_new(dharma_session_get_filename(session));
-
-    session_canvas = gui_templates_get_canvas_from_session(session);
-
     session_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    gtk_box_pack_start(GTK_BOX(session_vbox), session_canvas, true, true, 0);
+
+    gui_templates_pack_box_with_session(session, session_vbox);
+    dharma_session_set_gtk_box(session, session_vbox);
 
     if (nsessions == 1){
       return session_vbox;
@@ -183,4 +242,29 @@ void gui_templates_clear_container(GtkWidget *container){
     gtk_widget_destroy(GTK_WIDGET(iter->data));
   }
   g_list_free(children);
+}
+
+/**********
+ *
+ * HANDLERS
+ *
+ **********/
+
+void gui_templates_zoomout_button_handler(GtkWidget *widget, gpointer data){
+  D_Session *s = (D_Session *) data;
+  GtkWidget *box = dharma_session_get_gtk_box(s);
+  float curr_scale = dharma_session_get_scale(s);
+  dharma_session_set_scale(s, curr_scale / 1.25);
+  gui_templates_clear_container(box);
+  gui_templates_pack_box_with_session(s, box);
+  gtk_widget_show_all(box);
+}
+void gui_templates_zoomin_button_handler(GtkWidget *widget, gpointer data){
+  D_Session *s = (D_Session *) data;
+  GtkWidget *box = dharma_session_get_gtk_box(s);
+  float curr_scale = dharma_session_get_scale(s);
+  dharma_session_set_scale(s, curr_scale * 1.25);
+  gui_templates_clear_container(box);
+  gui_templates_pack_box_with_session(s, box);
+  gtk_widget_show_all(box);
 }

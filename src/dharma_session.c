@@ -34,6 +34,11 @@ typedef struct D_Session {
   uint32_t h;
   uint32_t bpp;
 
+  float scale;
+
+  void *gtk_image;
+  void *gtk_box;
+
   uint32_t nlayers;
   D_Image **layers;
 } D_Session;
@@ -51,11 +56,16 @@ D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp){
   s->h = h;
   s->bpp = bpp;
 
+  s->gtk_image = NULL;
+  s->gtk_box = NULL;
+
   //All new sessions have a white canvas by default
   D_Image *im = dharma_image_new_blank(w, h, bpp);
   s->layers = malloc(sizeof(D_Image *));
   s->layers[0] = im;
   s->nlayers = 1;
+
+  s->scale = 1;
 
   s->ID = nsessions;
 
@@ -137,6 +147,12 @@ bool dharma_sessions_destroy_all(){
  *
  *********/
 
+void *dharma_session_get_gtk_box(D_Session *s){
+  return s->gtk_box;
+}
+void *dharma_session_get_gtk_image(D_Session *s){
+  return s->gtk_image;
+}
 D_Session *dharma_session_get_session_from_id(uint32_t id){
   if (id >= nsessions){
     return NULL;
@@ -171,6 +187,10 @@ D_Image *dharma_session_get_layer(D_Session *s, uint32_t layer){
   return s->layers[layer];
 }
 
+float dharma_session_get_scale(D_Session *s){
+  return s->scale;
+}
+
 //Gets the file name, or a placeholder if filename is NULL
 const char *dharma_session_get_filename(D_Session *s){
   if (s->filename == NULL){
@@ -198,6 +218,22 @@ bool dharma_session_set_filename(D_Session *s, const char *name){
 
   s->filename = malloc(name[0] * (strlen(name) + 1));
   strcpy(s->filename, name);
+  return true;
+}
+
+void dharma_session_set_gtk_box(D_Session *s, void *box){
+  s->gtk_box = box;
+}
+void dharma_session_set_gtk_image(D_Session *s, void *image){
+  s->gtk_image = image;
+}
+
+bool dharma_session_set_scale(D_Session *s, float scale){
+  if (scale <= 0){
+    return false;
+  }
+
+  s->scale = scale;
   return true;
 }
 

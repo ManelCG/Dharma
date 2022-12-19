@@ -65,7 +65,9 @@ int main(int argc, char *argv[]){
 
   dharma_session_new(1920, 1080, 32);
   dharma_session_new(1280, 720, 24);
-  dharma_session_new(1, 2, 24);
+  D_Session *s2 = dharma_session_new(8, 8, 24);
+  im = dharma_session_get_layer(s2, 0);
+  dharma_image_fill_canvas_sequential(im);
   dharma_session_new(420, 69, 24);
   dharma_session_new(438, 793, 32);
 

@@ -39,10 +39,18 @@ D_Session *dharma_session_get_session_from_id(uint32_t id);
 uint32_t dharma_session_get_nsessions();
 const D_Session **dharma_session_get_sessions();
 
+float dharma_session_get_scale(D_Session *s);
+bool dharma_session_set_scale(D_Session *s, float scale);
+
 uint32_t dharma_session_get_width(D_Session *s);
 uint32_t dharma_session_get_height(D_Session *s);
 uint32_t dharma_session_get_bpp(D_Session *s);
 uint32_t dharma_session_get_Bpp(D_Session *s);
+
+void dharma_session_set_gtk_image(D_Session *s, void *image);
+void *dharma_session_get_gtk_image(D_Session *s);
+void dharma_session_set_gtk_box(D_Session *s, void *box);
+void *dharma_session_get_gtk_box(D_Session *s);
 
 D_Image *dharma_session_get_layer(D_Session *s, uint32_t layer);
 
