@@ -34,6 +34,9 @@ typedef struct D_Session {
   uint32_t h;
   uint32_t bpp;
 
+  uint32_t centerx;
+  uint32_t centery;
+
   float scale;
 
   void *gtk_image;
@@ -55,6 +58,9 @@ D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp){
   s->w = w;
   s->h = h;
   s->bpp = bpp;
+
+  s->centerx = w/2;
+  s->centery = h/2;
 
   s->gtk_image = NULL;
   s->gtk_box = NULL;
@@ -147,6 +153,10 @@ bool dharma_sessions_destroy_all(){
  *
  *********/
 
+void dharma_session_get_center(D_Session *s, uint32_t *x, uint32_t *y){
+  *x = s->centerx;
+  *y = s->centery;
+}
 void *dharma_session_get_gtk_box(D_Session *s){
   return s->gtk_box;
 }
@@ -234,6 +244,26 @@ bool dharma_session_set_scale(D_Session *s, float scale){
   }
 
   s->scale = scale;
+  return true;
+}
+bool dharma_session_set_center(D_Session *s, uint32_t x, uint32_t y){
+  if (x >= s->w || y >= s->h){
+    return false;
+  }
+
+  s->centerx = x;
+  s->centery = y;
+  return true;
+}
+bool dharma_session_offset_center(D_Session *s, int32_t x, int32_t y){
+  if (x + (int32_t) s->centerx < 0 || x + s->centerx >= s->w ||
+      y + (int32_t) s->centery < 0 || y + s->centery >= s->h){
+    return false;
+  }
+
+  s->centerx = x + s->centerx;
+  s->centery = y + s->centery;
+
   return true;
 }
 
@@ -342,7 +372,7 @@ void dharma_sessions_print_all(){
   if (sessions != NULL){
     for (i = 0; i < nsessions; i++){
       s = sessions[i];
-      printf("Session %d [%s]: %dx%d with depth %d and %d layers\n", s->ID, dharma_session_get_filename(s), s->w, s->h, s->bpp, s->nlayers);
+      printf("Session %d [%s]: %dx%d with depth %d and %d layers centered in %dx%d\n", s->ID, dharma_session_get_filename(s), s->w, s->h, s->bpp, s->nlayers, s->centerx, s->centery);
     }
   } else {
     printf("No sessions open\n");

@@ -47,6 +47,10 @@ uint32_t dharma_session_get_height(D_Session *s);
 uint32_t dharma_session_get_bpp(D_Session *s);
 uint32_t dharma_session_get_Bpp(D_Session *s);
 
+void dharma_session_get_center(D_Session *s, uint32_t *x, uint32_t *y);
+bool dharma_session_set_center(D_Session *s, uint32_t x, uint32_t y);
+bool dharma_session_offset_center(D_Session *s, int32_t x, int32_t y);
+
 void dharma_session_set_gtk_image(D_Session *s, void *image);
 void *dharma_session_get_gtk_image(D_Session *s);
 void dharma_session_set_gtk_box(D_Session *s, void *box);

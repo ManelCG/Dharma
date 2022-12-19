@@ -30,6 +30,7 @@
 #include <dharma_session.h>
 
 void draw_main_window(GtkWidget *window, gpointer data){
+  (void) data;
   gui_templates_clear_container(window);
 
   GtkWidget *main_vbox; //Contains the menubar and the rest of the widgets
@@ -65,7 +66,7 @@ int main(int argc, char *argv[]){
 
   dharma_session_new(1920, 1080, 32);
   dharma_session_new(1280, 720, 24);
-  D_Session *s2 = dharma_session_new(8, 8, 24);
+  D_Session *s2 = dharma_session_new(500, 500, 24);
   im = dharma_session_get_layer(s2, 0);
   dharma_image_fill_canvas_sequential(im);
   dharma_session_new(420, 69, 24);

@@ -31,7 +31,7 @@ GtkWidget *gui_templates_get_welcome_screen_box();
 GtkWidget *gui_templates_get_canvas_from_session(D_Session *s);
 GtkWidget *gui_templates_get_viewmode_toolbar(D_Session *s);
 
-GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s);
+GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t daw, uint32_t dah, float *newcx, float *newcy);
 GtkWidget *gui_templates_update_gtkimage(D_Session *s);
 
 //Helper functions
