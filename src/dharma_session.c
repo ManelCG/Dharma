@@ -37,10 +37,16 @@ typedef struct D_Session {
   uint32_t centerx;
   uint32_t centery;
 
+  float spanX;
+  float spanY;
+
   float scale;
 
   void *gtk_image;
   void *gtk_box;
+
+  void *gtk_hadj;
+  void *gtk_vadj;
 
   uint32_t nlayers;
   D_Image **layers;
@@ -59,11 +65,17 @@ D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp){
   s->h = h;
   s->bpp = bpp;
 
+  s->spanX = w;
+  s->spanY = h;
+
   s->centerx = w/2;
   s->centery = h/2;
 
   s->gtk_image = NULL;
   s->gtk_box = NULL;
+
+  s->gtk_hadj = NULL;
+  s->gtk_vadj = NULL;
 
   //All new sessions have a white canvas by default
   D_Image *im = dharma_image_new_blank(w, h, bpp);
@@ -153,6 +165,18 @@ bool dharma_sessions_destroy_all(){
  *
  *********/
 
+void *dharma_session_get_hadj(D_Session *s){
+  return s->gtk_hadj;
+}
+void *dharma_session_get_vadj(D_Session *s){
+  return s->gtk_vadj;
+}
+float dharma_session_get_spanx(D_Session *s){
+  return s->spanX;
+}
+float dharma_session_get_spany(D_Session *s){
+  return s->spanY;
+}
 void dharma_session_get_center(D_Session *s, uint32_t *x, uint32_t *y){
   *x = s->centerx;
   *y = s->centery;
@@ -231,11 +255,24 @@ bool dharma_session_set_filename(D_Session *s, const char *name){
   return true;
 }
 
+void dharma_session_set_hadj(D_Session *s, void *adj){
+  s->gtk_hadj = adj;
+}
+void dharma_session_set_vadj(D_Session *s, void *adj){
+  s->gtk_vadj = adj;
+}
 void dharma_session_set_gtk_box(D_Session *s, void *box){
   s->gtk_box = box;
 }
 void dharma_session_set_gtk_image(D_Session *s, void *image){
   s->gtk_image = image;
+}
+
+void dharma_session_set_spanx(D_Session *s, float span){
+  s->spanX = span;
+}
+void dharma_session_set_spany(D_Session *s, float span){
+  s->spanY = span;
 }
 
 bool dharma_session_set_scale(D_Session *s, float scale){

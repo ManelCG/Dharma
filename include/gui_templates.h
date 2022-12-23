@@ -32,7 +32,6 @@ GtkWidget *gui_templates_get_canvas_from_session(D_Session *s);
 GtkWidget *gui_templates_get_viewmode_toolbar(D_Session *s);
 
 GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t daw, uint32_t dah, float *newcx, float *newcy);
-GtkWidget *gui_templates_update_gtkimage(D_Session *s);
 
 //Helper functions
 void gui_templates_clear_container(GtkWidget *container);
@@ -40,5 +39,7 @@ void gui_templates_clear_container(GtkWidget *container);
 //Handlers
 void gui_templates_zoomin_button_handler(GtkWidget *w, gpointer d);
 void gui_templates_zoomout_button_handler(GtkWidget *w, gpointer d);
+
+void canvas_mouse_handler(GtkWidget *event_box, GdkEventButton *event, gpointer data);
 
 #endif //__GUI_TEMPLATES_H_

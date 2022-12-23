@@ -20,6 +20,7 @@
 #include <gui_templates.h>
 
 #include <dharma_session.h>
+#include <dharma_defines.h>
 
 /***************************
  *
@@ -82,8 +83,8 @@ GtkWidget *gui_templates_get_welcome_screen_box(){
 GtkWidget *gui_templates_get_viewmode_toolbar(D_Session *s){
   GtkWidget *main_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 
-  char scale[8];
-  snprintf(scale, 7, "%.2f", dharma_session_get_scale(s)*100);
+  char scale[16];
+  snprintf(scale, 15, "%.2f%%", dharma_session_get_scale(s)*100);
 
   GtkWidget *zoomin_button = gtk_button_new_with_label("+");
   g_signal_connect(zoomin_button, "pressed", G_CALLBACK(gui_templates_zoomin_button_handler), (gpointer) s);
@@ -92,7 +93,7 @@ GtkWidget *gui_templates_get_viewmode_toolbar(D_Session *s){
 
   GtkWidget *zoom_entry = gtk_entry_new();
   gtk_entry_set_text(GTK_ENTRY(zoom_entry), scale);
-  gtk_entry_set_width_chars(GTK_ENTRY(zoom_entry), 10);
+  gtk_entry_set_width_chars(GTK_ENTRY(zoom_entry), 16);
 
   gtk_box_pack_end(GTK_BOX(main_hbox), zoom_entry, false, false, 0);
   gtk_box_pack_end(GTK_BOX(main_hbox), zoomin_button, false, false, 0);
@@ -106,28 +107,22 @@ GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t da_width, ui
   GdkPixbuf *pixbuf_scaled = NULL;
   GdkPixbuf *pixbuf_cropped = NULL;
 
+
+  //STEP 1: GENERATE FULL PIXBUF
   D_Image *im = dharma_session_get_layer(s, 0);
   uint8_t *data = dharma_image_get_data(im);
+
+  float scale;
   uint32_t width, height, bpp, stride;
-  float cropw, croph, scalew, scaleh;
-  int32_t cropx, cropy;
   uint32_t centerx, centery;
-  float scale = dharma_session_get_scale(s);
-
-  dharma_session_get_center(s, &centerx, &centery);
-
   width = dharma_image_get_width(im);
   height = dharma_image_get_height(im);
   bpp = dharma_image_get_bpp(im);
   stride = width * bpp / 8;
+  scale = dharma_session_get_scale(s);
+  dharma_session_get_center(s, &centerx, &centery);
 
-  uint32_t postscale_width = width * scale;
-  uint32_t postscale_height = height * scale;
-
-  if (postscale_width <= 0 || postscale_height <= 0){
-    return NULL;
-  }
-
+  //Generate pixbuf
   switch(bpp){
     case 8:
 
@@ -155,55 +150,65 @@ GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t da_width, ui
       break;
   }
 
-  cropw = (postscale_width > da_width?   (float) da_width/scale  : (float) postscale_width/scale);
-  croph = (postscale_height > da_height? (float) da_height/scale : (float) postscale_height/scale);
 
-  if (cropw <= 1){
-    cropw = 1;
-    scale = da_width/cropw;
-  }
-  if (croph <= 1){
-    croph = 1;
-    scale = da_height/croph;
-  }
+  //STEP 2: CROP PIXBUF BEFORE SCALING
 
+  float cropw, croph;
+  float cropx, cropy;
 
-  cropx = (postscale_width < da_width? 0 : centerx - cropw/2);
-  cropy = (postscale_height < da_height? 0 : centery - croph/2);
+  GtkAdjustment *vadj, *hadj;
 
-  if (cropx < 0){
-    cropx = 0;
-  }
-  if (cropy < 0){
-    cropy = 0;
-  }
-  if (cropx + cropw > width){
-    cropx = width - cropw;
-  }
-  if (cropy + croph > height){
-    cropy = height - croph;
-  }
+  //I know my DA's size and my image's size.
+  cropw = MIN(width,  ((float) da_width  / scale) +2);
+  croph = MIN(height, ((float) da_height / scale) +2);
+
+  //Information for drawing scrollbars
+  dharma_session_set_spanx(s, cropw);
+  dharma_session_set_spany(s, croph);
+  hadj = (GtkAdjustment *) dharma_session_get_hadj(s);
+  gtk_adjustment_set_page_size(hadj, cropw);
+  gtk_adjustment_set_value(hadj, MIN(MAX(centerx - cropw/2, 0), width));
+  vadj = (GtkAdjustment *) dharma_session_get_vadj(s);
+  gtk_adjustment_set_page_size(vadj, croph);
+  gtk_adjustment_set_value(vadj, MIN(MAX(centery - croph/2, 0), height));
+
+  //Start cropping image leaving center in the middle
+  cropx = (float) centerx - cropw/2;
+  cropy = (float) centery - croph/2;
+
+  //Keep cropx bounded by 0..width-cropw
+  cropx = MAX(cropx, 0);
+  cropy = MAX(cropy, 0);
+  cropx = MIN(cropx, (float) width - cropw);
+  cropy = MIN(cropy, (float) height - croph);
 
   pixbuf_cropped = gdk_pixbuf_new_subpixbuf(pixbuf, cropx, cropy, cropw, croph);
 
+  //STEP 3: SCALE PIXBUF
+  //Sizes after scaling and cropping
+  float scalew, scaleh;
   scalew = cropw * scale;
   scaleh = croph * scale;
 
-  if (cropw == 1 && croph == 1){
-    pixbuf_scaled = gdk_pixbuf_scale_simple(pixbuf_cropped, da_width, da_height, GDK_INTERP_NEAREST);
-  } else {
-    if (scale >= 1){
-      pixbuf_scaled = gdk_pixbuf_scale_simple(pixbuf_cropped, scalew, scaleh, GDK_INTERP_NEAREST);
-    } else {
-      pixbuf_scaled = gdk_pixbuf_scale_simple(pixbuf_cropped, scalew, scaleh, GDK_INTERP_BILINEAR);
-    }
+  //Zoom is too little, can't draw less than 1 pixel in any dimension
+  if (scalew < 1 || scaleh < 1){
+    g_object_unref(pixbuf);
+    g_object_unref(pixbuf_cropped);
+    return NULL;
   }
 
-  *newcx = (((float) centerx) * ((float) scalew / (float) width));
-  *newcy = (((float) centery) * ((float) scaleh / (float) height));
+  if (scale >= 1){
+    pixbuf_scaled = gdk_pixbuf_scale_simple(pixbuf_cropped, scalew, scaleh, GDK_INTERP_NEAREST);
+  } else {
+    pixbuf_scaled = gdk_pixbuf_scale_simple(pixbuf_cropped, scalew, scaleh, GDK_INTERP_BILINEAR);
+  }
+
+  *newcx = ((float) centerx - cropx) * scale;
+  *newcy = ((float) centery - cropy) * scale;
 
   g_object_unref(pixbuf);
   g_object_unref(pixbuf_cropped);
+
   return pixbuf_scaled;
 }
 
@@ -237,17 +242,17 @@ gboolean on_window_draw(GtkWidget *da, GdkEvent *event, gpointer data){
   pixbuf_w = gdk_pixbuf_get_width(pixbuf);
   pixbuf_h = gdk_pixbuf_get_height(pixbuf);
 
-  draww = pixbuf_w > (uint32_t) alloc->width?  (uint32_t) alloc->width : pixbuf_w;
-  drawh = pixbuf_h > (uint32_t) alloc->height? (uint32_t) alloc->height : pixbuf_h;
+  draww = pixbuf_w;
+  drawh = pixbuf_h;
 
-  drawx = pixbuf_w > (uint32_t) alloc->width? 0 : (float) da_centerx - (float) draww/2;
-  drawy = pixbuf_w > (uint32_t) alloc->width? 0 : (float) da_centery - (float) drawh/2;
+  drawx = (float) da_centerx - im_centerx;
+  drawy = (float) da_centery - im_centery;
 
-  drawx += ((float) pixbuf_w/2 - (float) im_centerx);
-  drawy += ((float) pixbuf_h/2 - (float) im_centery);
+  // drawx += ((float) pixbuf_w/2 - (float) im_centerx);
+  // drawy += ((float) pixbuf_h/2 - (float) im_centery);
 
   gdk_cairo_set_source_pixbuf(cr, pixbuf, drawx, drawy);
-  cairo_rectangle(cr, drawx, drawy, draww, drawh + drawh);
+  cairo_rectangle(cr, drawx, drawy, draww, drawh);
   cairo_fill(cr);
 
   cairo_destroy(cr);
@@ -259,19 +264,58 @@ gboolean on_window_draw(GtkWidget *da, GdkEvent *event, gpointer data){
 
 GtkWidget *gui_templates_get_canvas_from_session(D_Session *s){
   GtkWidget *da;
+  GtkWidget *event_box;
 
   da = gtk_drawing_area_new();
   g_signal_connect(da, "draw", G_CALLBACK(on_window_draw), (gpointer) s);
 
-  return da;
+  event_box = gtk_event_box_new();
+  g_signal_connect(G_OBJECT(event_box), "motion-notify-event",  G_CALLBACK(canvas_mouse_handler), (gpointer) s);
+  g_signal_connect(G_OBJECT(event_box), "button-press-event",   G_CALLBACK(canvas_mouse_handler), (gpointer) s);
+  g_signal_connect(G_OBJECT(event_box), "button-release-event", G_CALLBACK(canvas_mouse_handler), (gpointer) s);
+  gtk_container_add(GTK_CONTAINER(event_box), da);
+
+  return event_box;
 }
 
 void gui_templates_pack_box_with_session(D_Session *session, GtkWidget *session_vbox){
   GtkWidget *session_viewmode_toolbar;
   GtkWidget *session_canvas;
 
+  GtkWidget *hbox;
+
+  GtkWidget *vertical_scrollbar;
+  GtkWidget *horizontal_scrollbar;
+
+  GtkAdjustment *vertical_adjustment;
+  GtkAdjustment *horizontal_adjustment;
+
+  hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+
+  uint32_t w, h, cx, cy;
+  float spanx, spany;
+
+  w = dharma_session_get_width(session);
+  h = dharma_session_get_height(session);
+  dharma_session_get_center(session, &cx, &cy);
+  spanx = dharma_session_get_spanx(session);
+  spany = dharma_session_get_spany(session);
+
   session_canvas = gui_templates_get_canvas_from_session(session);
-  gtk_box_pack_start(GTK_BOX(session_vbox), session_canvas, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(hbox), session_canvas, true, true, 0);
+
+  vertical_adjustment = gtk_adjustment_new(cy, 0, h, 1, h, spany);
+  vertical_scrollbar = gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, vertical_adjustment);
+  gtk_box_pack_start(GTK_BOX(hbox), vertical_scrollbar, false, false, 0);
+
+  gtk_box_pack_start(GTK_BOX(session_vbox), hbox, true, true, 0);
+
+  horizontal_adjustment = gtk_adjustment_new(cx, 0, w, 1, w, spanx);
+  horizontal_scrollbar = gtk_scrollbar_new(GTK_ORIENTATION_HORIZONTAL, horizontal_adjustment);
+  gtk_box_pack_start(GTK_BOX(session_vbox), horizontal_scrollbar, false, false, 0);
+
+  dharma_session_set_vadj(session, vertical_adjustment);
+  dharma_session_set_hadj(session, horizontal_adjustment);
 
   {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
      gtk_box_pack_start(GTK_BOX(session_vbox), separator, false, false, 0);}
@@ -359,4 +403,18 @@ void gui_templates_zoomin_button_handler(GtkWidget *widget, gpointer data){
   gui_templates_clear_container(box);
   gui_templates_pack_box_with_session(s, box);
   gtk_widget_show_all(box);
+}
+void canvas_mouse_handler(GtkWidget *event_box, GdkEventButton *event, gpointer data){
+  double evb_height, evb_width;
+  D_Session *s = (D_Session *) data;
+  (void) event_box;
+
+  evb_height = gtk_widget_get_allocated_height(event_box);
+  evb_width = gtk_widget_get_allocated_height(event_box);
+
+  (void) evb_height;
+  (void) evb_width;
+  (void) s;
+
+  printf("%f, %f\n", event->x, event->y);
 }

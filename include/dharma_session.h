@@ -39,6 +39,16 @@ D_Session *dharma_session_get_session_from_id(uint32_t id);
 uint32_t dharma_session_get_nsessions();
 const D_Session **dharma_session_get_sessions();
 
+void dharma_session_set_spanx(D_Session *s, float span);
+void dharma_session_set_spany(D_Session *s, float span);
+float dharma_session_get_spanx(D_Session *s);
+float dharma_session_get_spany(D_Session *s);
+
+void dharma_session_set_hadj(D_Session *s, void *);
+void dharma_session_set_vadj(D_Session *s, void *);
+void *dharma_session_get_hadj(D_Session *s);
+void *dharma_session_get_vadj(D_Session *s);
+
 float dharma_session_get_scale(D_Session *s);
 bool dharma_session_set_scale(D_Session *s, float scale);
 
