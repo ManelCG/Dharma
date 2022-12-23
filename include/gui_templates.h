@@ -24,6 +24,8 @@
 #ifndef __GUI_TEMPLATES_H_
 #define __GUI_TEMPLATES_H_
 
+void draw_main_window(GtkWidget *window, gpointer data);
+
 //Gui elements constructors
 GtkWidget *gui_templates_get_mainscreen_menubar();
 GtkWidget *gui_templates_get_sessions_notebook();
@@ -33,8 +35,11 @@ GtkWidget *gui_templates_get_viewmode_toolbar(D_Session *s);
 
 GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t daw, uint32_t dah, float *newcx, float *newcy);
 
+void gui_templates_new_file_window(GtkWidget *w_unused, gpointer gp_unused);
+
 //Helper functions
 void gui_templates_clear_container(GtkWidget *container);
+void gui_templates_destroy(GtkWidget *w, gpointer data);
 
 //Handlers
 void gui_templates_zoomin_button_handler(GtkWidget *w, gpointer d);

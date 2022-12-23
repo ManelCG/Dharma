@@ -22,6 +22,34 @@
 #include <dharma_session.h>
 #include <dharma_defines.h>
 
+/*******************
+ *
+ * DRAWING FUNCTIONS
+ *
+ ******************/
+
+void draw_main_window(GtkWidget *window, gpointer data){
+  (void) data;
+  gui_templates_clear_container(window);
+
+  GtkWidget *main_vbox; //Contains the menubar and the rest of the widgets
+
+  GtkWidget *menu_menubar;
+  GtkWidget *notebook_sessions;
+
+  notebook_sessions = gui_templates_get_sessions_notebook();
+
+  main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  menu_menubar = gui_templates_get_mainscreen_menubar();
+  gtk_box_pack_start(GTK_BOX(main_vbox), menu_menubar, false, false, 0);
+
+  gtk_box_pack_start(GTK_BOX(main_vbox), notebook_sessions, true, true, 0);
+
+  gtk_container_add(GTK_CONTAINER(window), main_vbox);
+  gtk_widget_show_all(window);
+}
+
+
 /***************************
  *
  * GUI ELEMENTS CONSTRUCTORS
@@ -67,15 +95,103 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
   return menu_menubar;
 }
 
-GtkWidget *gui_templates_get_welcome_screen_box(){
+void gui_templates_new_file_window(GtkWidget *w_unused, gpointer data){
+  (void) w_unused;
+  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) data);
+
+  GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, (GtkMessageType) GTK_DIALOG_DESTROY_WITH_PARENT, GTK_BUTTONS_OK_CANCEL, "Create new file");
+  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+  gtk_container_set_border_width(GTK_CONTAINER(dialog), 0);
+
+  GtkWidget *dialog_button_cancel = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_cancel), "Cancel");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+    gtk_button_set_image(GTK_BUTTON(dialog_button_cancel), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_cancel), true);
+
+  GtkWidget *dialog_button_ok = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+  gtk_button_set_label(GTK_BUTTON(dialog_button_ok), "Accept");
+  { GtkWidget *icon = gtk_image_new_from_icon_name("emblem-ok-symbolic", GTK_ICON_SIZE_MENU);
+    gtk_button_set_image(GTK_BUTTON(dialog_button_ok), icon); }
+  gtk_button_set_always_show_image(GTK_BUTTON(dialog_button_ok), true);
+
   GtkWidget *main_vbox;
+  GtkWidget *geometry_vbox;
+
+  GtkWidget *entry_width, *entry_height, *combo_bpp;
+  entry_width = gtk_entry_new();
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_width), "Width");
+
+  entry_height = gtk_entry_new();
+  gtk_entry_set_placeholder_text(GTK_ENTRY(entry_height), "Height");
+
+  combo_bpp = gtk_combo_box_text_new();
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_bpp), "8");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_bpp), "24");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_bpp), "32");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_bpp), "64");
+
+  geometry_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(geometry_vbox), entry_width, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(geometry_vbox), entry_height, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(geometry_vbox), combo_bpp, true, true, 0);
+
+  main_vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  gtk_box_pack_start(GTK_BOX(main_vbox), geometry_vbox, false, false, 0);
+
+  gtk_widget_show_all(dialog);
+
+  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+  if (response == GTK_RESPONSE_OK){
+    const char *width = gtk_entry_get_text(GTK_ENTRY(entry_width));
+    const char *height = gtk_entry_get_text(GTK_ENTRY(entry_height));
+    const char *bpp = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo_bpp));
+
+    D_Session *s = dharma_session_new(atoi(width), atoi(height), atoi(bpp));
+    dharma_sessions_print_all();
+
+    draw_main_window(window_root, NULL);
+
+    gui_templates_destroy(dialog, dialog);
+  } else {
+    gui_templates_destroy(dialog, dialog);
+    return;
+  }
+}
+
+GtkWidget *gui_templates_get_welcome_screen_box(){
+  GtkWidget *frame;
+  GtkWidget *main_vbox;
+  GtkWidget *main_hbox;
+  GtkWidget *frame_subvbox;
 
   GtkWidget *label_welcome;
 
-  label_welcome = gtk_label_new("Welcome to Dharma!");
+  GtkWidget *button_new_file;
+  GtkWidget *button_open_file;
+
+  label_welcome = gtk_label_new(NULL);
+  gtk_label_set_markup(GTK_LABEL(label_welcome), "<span size=\"x-large\">Welcome to Dharma!</span>");
+
+  button_new_file = gtk_button_new_with_label("New file");
+  g_signal_connect(button_new_file, "activate", G_CALLBACK(gui_templates_new_file_window), (gpointer) button_new_file);
+  g_signal_connect(button_new_file, "pressed", G_CALLBACK(gui_templates_new_file_window), (gpointer) button_new_file);
+  button_open_file = gtk_button_new_with_label("Open file");
+
+  frame_subvbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  gtk_box_pack_start(GTK_BOX(frame_subvbox), label_welcome, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(frame_subvbox), button_new_file, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(frame_subvbox), button_open_file, true, true, 0);
+
+  frame = gtk_frame_new(NULL);
+  gtk_container_add(GTK_CONTAINER(frame), frame_subvbox);
+
+  main_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_box_pack_start(GTK_BOX(main_hbox), frame, true, false, 0);
 
   main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-  gtk_box_pack_start(GTK_BOX(main_vbox), label_welcome, true, true, 0);
+  gtk_box_pack_start(GTK_BOX(main_vbox), main_hbox, true, false, 0);
+
 
   return main_vbox;
 }
@@ -376,6 +492,13 @@ void gui_templates_clear_container(GtkWidget *container){
     gtk_widget_destroy(GTK_WIDGET(iter->data));
   }
   g_list_free(children);
+}
+
+void gui_templates_destroy(GtkWidget *w, gpointer data){
+  (void) w;
+  GtkWidget *window = (GtkWidget *) data;
+  gui_templates_clear_container(window);
+  gtk_widget_destroy(window);
 }
 
 /**********
