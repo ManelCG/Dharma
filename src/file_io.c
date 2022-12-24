@@ -32,7 +32,11 @@ D_Session *file_io_open_file(const char *filename){
   }
 
   char buffer[strlen(filename) + 1];
+  #ifdef __unix__
   char *tok = strrchr(filename, '/');
+  #elif defined(_WIN32) || defined (WIN32)
+  char *tok = strrchr(filename, '\\');
+  #endif
   if (tok != NULL){
     strcpy(buffer, tok+1);
   } else {

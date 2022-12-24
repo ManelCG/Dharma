@@ -552,7 +552,7 @@ D_Session *gui_templates_open_file(GtkWidget *w, gpointer data){
 
   return ret;
   #elif defined(_WIN32) || defined (WIN32)
-  const char filename[MAX_PATH];
+  char filename[MAX_PATH];
   D_Session *ret = NULL;
   GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) data);
   filename[0] = '\0';
@@ -561,7 +561,7 @@ D_Session *gui_templates_open_file(GtkWidget *w, gpointer data){
   OPENFILENAMEA ofn;
   memset(&ofn, 0, sizeof(ofn));
   ofn.lStructSize = sizeof(ofn);
-  ofn.hwnd.Owner = NULL;
+  ofn.hwndOwner = NULL;
   ofn.hInstance = NULL;
   // ofn.lpstrFilter =
   ofn.lpstrFile = filename;
