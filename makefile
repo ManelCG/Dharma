@@ -49,6 +49,10 @@ $(DODIR)/%.o: $(SDIR)/%.c $(DEPS)
 	mkdir -p $(DODIR)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
+$(WODIR)/%.o: $(SDIR)/%.c $(DEPS)
+	mkdir -p $(WODIR)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
 release: $(OBJ)
 	mkdir -p $(BDIR)
 	mkdir -p $(ODIR)
