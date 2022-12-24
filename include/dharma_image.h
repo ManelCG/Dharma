@@ -30,6 +30,7 @@ typedef struct D_Image D_Image;
 //Constructors
 D_Image *dharma_image_new_empty(uint32_t w, uint32_t h, uint32_t bpp);
 D_Image *dharma_image_new_blank(uint32_t w, uint32_t h, uint32_t bpp);
+D_Image *dharma_image_new_from_data(uint8_t *data, uint32_t w, uint32_t h, uint32_t bpp);
 
 //Destructors
 bool dharma_image_destroy(D_Image *im);

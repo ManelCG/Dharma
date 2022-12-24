@@ -28,6 +28,7 @@
 typedef struct D_Session {
   uint32_t ID;
 
+  char *path;
   char *filename;
 
   uint32_t w;
@@ -60,6 +61,7 @@ D_Session **sessions = NULL;
 D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp){
   D_Session *s = malloc(sizeof(D_Session));
 
+  s->path = NULL;
   s->filename = NULL;
   s->w = w;
   s->h = h;
@@ -79,6 +81,50 @@ D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp){
 
   //All new sessions have a white canvas by default
   D_Image *im = dharma_image_new_blank(w, h, bpp);
+  s->layers = malloc(sizeof(D_Image *));
+  s->layers[0] = im;
+  s->nlayers = 1;
+
+  s->scale = 1;
+
+  s->ID = nsessions;
+
+  //Allocate space for a new session in sessions array and add it
+  if (sessions == NULL){
+    sessions = malloc(sizeof(D_Session *));
+  } else {
+    sessions = realloc(sessions, sizeof(D_Session *) * (nsessions + 1));
+  }
+  sessions[nsessions] = s;
+  nsessions++;
+
+  return s;
+}
+
+//Constructors
+D_Session *dharma_session_new_from_data(uint8_t *data, uint32_t w, uint32_t h, uint32_t bpp){
+  D_Session *s = malloc(sizeof(D_Session));
+
+  s->path = NULL;
+  s->filename = NULL;
+  s->w = w;
+  s->h = h;
+  s->bpp = bpp;
+
+  s->spanX = w;
+  s->spanY = h;
+
+  s->centerx = w/2;
+  s->centery = h/2;
+
+  s->gtk_image = NULL;
+  s->gtk_box = NULL;
+
+  s->gtk_hadj = NULL;
+  s->gtk_vadj = NULL;
+
+
+  D_Image *im = dharma_image_new_from_data(data, w, h, bpp);
   s->layers = malloc(sizeof(D_Image *));
   s->layers[0] = im;
   s->nlayers = 1;
@@ -226,6 +272,13 @@ float dharma_session_get_scale(D_Session *s){
 }
 
 //Gets the file name, or a placeholder if filename is NULL
+const char *dharma_session_get_path(D_Session *s){
+  if (s->path == NULL){
+    return "Unnamed file";
+  } else {
+    return s->path;
+  }
+}
 const char *dharma_session_get_filename(D_Session *s){
   if (s->filename == NULL){
     return "Unnamed file";
@@ -241,6 +294,19 @@ const char *dharma_session_get_filename(D_Session *s){
  *********/
 
 //Sets the filename for the session. If an old filename already existed, it is safely freed.
+bool dharma_session_set_path(D_Session *s, const char *name){
+  if (name == NULL){
+    return false;
+  }
+
+  if (s->path != NULL){
+    free(s->path);
+  }
+
+  s->path = malloc(name[0] * (strlen(name) + 1));
+  strcpy(s->path, name);
+  return true;
+}
 bool dharma_session_set_filename(D_Session *s, const char *name){
   if (name == NULL){
     return false;

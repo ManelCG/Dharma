@@ -28,6 +28,7 @@ typedef struct D_Session D_Session;
 
 //Constructors
 D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp);
+D_Session *dharma_session_new_from_data(uint8_t *data, uint32_t w, uint32_t h, uint32_t bpp);
 
 //Destructors
 bool dharma_session_destroy_from_id(uint32_t id);
@@ -68,6 +69,8 @@ void *dharma_session_get_gtk_box(D_Session *s);
 
 D_Image *dharma_session_get_layer(D_Session *s, uint32_t layer);
 
+const char *dharma_session_get_path(D_Session *s);
+bool dharma_session_set_path(D_Session *s, const char *name);
 const char *dharma_session_get_filename(D_Session *s);
 bool dharma_session_set_filename(D_Session *s, const char *name);
 

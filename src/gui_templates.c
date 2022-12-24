@@ -420,6 +420,9 @@ void gui_templates_pack_box_with_session(D_Session *session, GtkWidget *session_
   session_canvas = gui_templates_get_canvas_from_session(session);
   gtk_box_pack_start(GTK_BOX(hbox), session_canvas, true, true, 0);
 
+  //TODO: catch scrollbar movement
+  //g_signal_connect(vertical_adjustment, "value_changed", HANDLER, (gpointer) session);
+
   vertical_adjustment = gtk_adjustment_new(cy, 0, h, 1, h, spany);
   vertical_scrollbar = gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, vertical_adjustment);
   gtk_box_pack_start(GTK_BOX(hbox), vertical_scrollbar, false, false, 0);

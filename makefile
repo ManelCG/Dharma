@@ -33,10 +33,10 @@ LDIR=lib
 
 LIBS = -lm -lpthread
 
-_DEPS = dharma_defines.h dharma_image.h dharma_color.h dharma_math.h dharma_session.h gui_templates.h
+_DEPS = dharma_defines.h dharma_image.h dharma_color.h dharma_math.h dharma_session.h gui_templates.h file_io.h stb_image.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = dharma.o dharma_image.o dharma_color.o dharma_math.o dharma_session.o gui_templates.o
+_OBJ = dharma.o dharma_image.o dharma_color.o dharma_math.o dharma_session.o gui_templates.o file_io.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 WOBJ = $(patsubst %,$(WODIR)/%,$(_OBJ))
 DOBJ = $(patsubst %,$(DODIR)/%,$(_OBJ))

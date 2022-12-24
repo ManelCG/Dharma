@@ -58,6 +58,19 @@ D_Image *dharma_image_new_empty(uint32_t w, uint32_t h, uint32_t bpp){
   return im;
 }
 
+//Creates a new image from data
+D_Image *dharma_image_new_from_data(uint8_t *data, uint32_t w, uint32_t h, uint32_t bpp){
+  D_Image *im = malloc(sizeof(D_Image));
+
+  im->w = w;
+  im->h = h;
+  im->bpp = bpp;
+
+  im->data = data;
+
+  return im;
+}
+
 //Creates a new image with a white canvas.
 D_Image *dharma_image_new_blank(uint32_t w, uint32_t h, uint32_t bpp){
   D_Image *im = dharma_image_new_empty(w, h, bpp);

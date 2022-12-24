@@ -23,6 +23,8 @@
 
 #include <gui_templates.h>
 
+#include <file_io.h>
+
 #include <dharma_image.h>
 #include <dharma_defines.h>
 #include <dharma_math.h>
@@ -31,6 +33,8 @@
 
 int main(int argc, char *argv[]){
   gtk_init(&argc, &argv);
+
+  file_io_open_file("/home/hrad/Pictures/wallpapers/repo/Ruin_Fantasy_World.jpg");
 
   // D_Session *s = dharma_session_new(200, 500, 32);
   // D_Image *im = dharma_image_new_empty(200, 500, 32);
