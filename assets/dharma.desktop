@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=0.1.0
+Type=Application
+Name=Dharma
+Comment=An open source image editor
+Exec=dharma
+Icon=dharma
+Terminal=false
+StartupNotify=false
+Categories=Image;
