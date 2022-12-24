@@ -37,6 +37,9 @@ GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t daw, uint32_
 
 void gui_templates_new_file_window(GtkWidget *w_unused, gpointer gp_unused);
 
+//Wrappers
+D_Session *gui_templates_open_file();
+
 //Helper functions
 void gui_templates_clear_container(GtkWidget *container);
 void gui_templates_destroy(GtkWidget *w, gpointer data);

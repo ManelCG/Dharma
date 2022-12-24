@@ -22,6 +22,14 @@
 #include <dharma_session.h>
 #include <dharma_defines.h>
 
+#include <file_io.h>
+
+#ifdef __unix__
+
+#elif defined(_WIN32) || defined (WIN32)
+#include <windows.h>
+#endif
+
 /*******************
  *
  * DRAWING FUNCTIONS
@@ -62,6 +70,8 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
   //File menu
   GtkWidget *menu_filemenu;
   GtkWidget *menu_fileMi;
+  GtkWidget *menu_button_new_file;
+  GtkWidget *menu_button_open_file;
 
   //Edit menu
   GtkWidget *menu_editmenu;
@@ -81,6 +91,32 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
   menu_fileMi = gtk_menu_item_new_with_label("File");
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_menubar), menu_fileMi);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_fileMi), menu_filemenu);
+
+  {
+    menu_button_open_file = gtk_image_menu_item_new_with_label("Open file");
+    g_signal_connect(menu_button_open_file, "activate", G_CALLBACK(gui_templates_open_file), (gpointer) menu_menubar);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    #elif defined(_WIN32) || defined (WIN32)
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    #endif
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_open_file), icon);
+    gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(menu_button_open_file), true);
+  }
+  {
+    menu_button_new_file = gtk_image_menu_item_new_with_label("New file");
+    g_signal_connect(menu_button_new_file, "activate", G_CALLBACK(gui_templates_new_file_window), (gpointer) menu_menubar);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    #elif defined(_WIN32) || defined (WIN32)
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    #endif
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_new_file), icon);
+    gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(menu_button_new_file), true);
+  }
+
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_open_file);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_filemenu), menu_button_new_file);
 
   //Edit submenu
   menu_editMi = gtk_menu_item_new_with_label("Edit");
@@ -148,7 +184,7 @@ void gui_templates_new_file_window(GtkWidget *w_unused, gpointer data){
     const char *bpp = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(combo_bpp));
 
     D_Session *s = dharma_session_new(atoi(width), atoi(height), atoi(bpp));
-    dharma_sessions_print_all();
+    (void) s;
 
     draw_main_window(window_root, NULL);
 
@@ -177,6 +213,8 @@ GtkWidget *gui_templates_get_welcome_screen_box(){
   g_signal_connect(button_new_file, "activate", G_CALLBACK(gui_templates_new_file_window), (gpointer) button_new_file);
   g_signal_connect(button_new_file, "pressed", G_CALLBACK(gui_templates_new_file_window), (gpointer) button_new_file);
   button_open_file = gtk_button_new_with_label("Open file");
+  g_signal_connect(button_open_file, "activate", G_CALLBACK(gui_templates_open_file), (gpointer) button_open_file);
+  g_signal_connect(button_open_file, "pressed", G_CALLBACK(gui_templates_open_file), (gpointer) button_open_file);
 
   frame_subvbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   gtk_box_pack_start(GTK_BOX(frame_subvbox), label_welcome, true, true, 0);
@@ -482,6 +520,66 @@ GtkWidget *gui_templates_get_sessions_notebook(){
   return notebook;
 }
 
+/**********
+ *
+ * WRAPPERS
+ *
+ *********/
+
+D_Session *gui_templates_open_file(GtkWidget *w, gpointer data){
+  #ifdef __unix__
+  const char *filename = NULL;
+  D_Session *ret = NULL;
+  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) data);
+  (void) w;
+
+  GtkWidget *dialog = gtk_file_chooser_dialog_new("Open file", NULL, GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
+  GtkFileFilter *filter = gtk_file_filter_new();
+  gtk_file_filter_add_pixbuf_formats(filter);
+  gtk_file_filter_add_pattern(filter, "*.dharma");
+  gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+  gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+  int response = gtk_dialog_run(GTK_DIALOG(dialog));
+  if (response == GTK_RESPONSE_ACCEPT){
+    filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+  }
+  gui_templates_destroy(dialog, dialog);
+
+  if (filename != NULL){
+    ret = file_io_open_file(filename);
+    draw_main_window(window_root, NULL);
+  }
+
+  return ret;
+  #elif defined(_WIN32) || defined (WIN32)
+  const char filename[MAX_PATH];
+  D_Session *ret = NULL;
+  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) data);
+  filename[0] = '\0';
+  (void) w;
+
+  OPENFILENAMEA ofn;
+  memset(&ofn, 0, sizeof(ofn));
+  ofn.lStructSize = sizeof(ofn);
+  ofn.hwnd.Owner = NULL;
+  ofn.hInstance = NULL;
+  // ofn.lpstrFilter =
+  ofn.lpstrFile = filename;
+  ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrTitle = "Open file";
+  ofn.Flags = OFN_NONETWORKBUTTON | OFN_FILEMUSTEXIST;
+
+  if (!GetOpenFileName(&ofn)){
+    return NULL;
+  }
+
+  ret = file_io_open_file(filename);
+  draw_main_window(window_root, NULL);
+
+  return ret;
+  #endif
+}
+
 /******************
  *
  * HELPER FUNCTIONS
@@ -542,5 +640,5 @@ void canvas_mouse_handler(GtkWidget *event_box, GdkEventButton *event, gpointer 
   (void) evb_width;
   (void) s;
 
-  printf("%f, %f\n", event->x, event->y);
+  // printf("%f, %f\n", event->x, event->y);
 }

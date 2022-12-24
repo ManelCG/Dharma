@@ -27,6 +27,10 @@ D_Session *file_io_open_file(const char *filename){
   int32_t x, y, n;
   uint8_t *data = stbi_load(filename, &x, &y, &n, 0);
 
+  if (data == NULL){
+    return NULL;
+  }
+
   char buffer[strlen(filename) + 1];
   char *tok = strrchr(filename, '/');
   if (tok != NULL){
