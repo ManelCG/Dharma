@@ -50,12 +50,14 @@ typedef struct D_Session {
   void *gtk_vadj;
 
   uint32_t nlayers;
+  uint32_t selected_layer;
   D_Image **layers;
 } D_Session;
 
 //Global variables
 uint32_t nsessions = 0;
 D_Session **sessions = NULL;
+uint32_t selected_session = 0;
 
 //Constructors
 D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp){
@@ -78,6 +80,8 @@ D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp){
 
   s->gtk_hadj = NULL;
   s->gtk_vadj = NULL;
+
+  s->selected_layer = 0;
 
   //All new sessions have a white canvas by default
   D_Image *im = dharma_image_new_blank(w, h, bpp);
@@ -257,6 +261,12 @@ uint32_t dharma_session_get_bpp(D_Session *s){
 }
 uint32_t dharma_session_get_Bpp(D_Session *s){
   return s->bpp/8;
+}
+D_Session *dharma_session_get_selected_session(){
+  return sessions[selected_session];
+}
+D_Image  *dharma_session_get_selected_layer(D_Session *s){
+  return s->layers[s->selected_layer];
 }
 
 D_Image *dharma_session_get_layer(D_Session *s, uint32_t layer){
@@ -440,6 +450,71 @@ bool dharma_session_remove_layer(D_Session *s, uint32_t index){
   s->layers = new_layers;
   return true;
 }
+
+
+/********************
+ *
+ * SESSION OPERATIONS
+ *
+ ********************/
+
+bool dharma_session_rotate_clockwise(D_Session *s){
+  uint32_t aux;
+  for (uint32_t i = 0; i < s->nlayers; i++){
+    if (!dharma_image_rotate_clockwise(s->layers[i])){
+      return false;
+    }
+  }
+
+  aux = s->centerx;
+  s->centerx = s->centery;
+  s->centery = aux;
+
+  return true;
+}
+bool dharma_session_rotate_anticlockwise(D_Session *s){
+  uint32_t aux;
+  for (uint32_t i = 0; i < s->nlayers; i++){
+    if (!dharma_image_rotate_anticlockwise(s->layers[i])){
+      return false;
+    }
+  }
+
+  aux = s->centerx;
+  s->centerx = s->centery;
+  s->centery = aux;
+
+  return true;
+}
+bool dharma_session_rotate_180(D_Session *s){
+  for (uint32_t i = 0; i < s->nlayers; i++){
+    if (!dharma_image_rotate_180(s->layers[i])){
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool dharma_session_flip_horizontally(D_Session *s){
+  for (uint32_t i = 0; i < s->nlayers; i++){
+    if (!dharma_image_flip_horizontally(s->layers[i])){
+      return false;
+    }
+  }
+
+  return true;
+}
+bool dharma_session_flip_vertically(D_Session *s){
+  for (uint32_t i = 0; i < s->nlayers; i++){
+    if (!dharma_image_flip_vertically(s->layers[i])){
+      return false;
+    }
+  }
+
+  return true;
+}
+
 
 /***********************
  *

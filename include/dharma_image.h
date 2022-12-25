@@ -53,6 +53,13 @@ bool dharma_image_set_pixel_from_2Barray(D_Image *im, uint32_t x, uint32_t y, co
 //Image operations
 bool dharma_image_fill_canvas(D_Image *im, uint64_t color);
 
+bool dharma_image_rotate_clockwise(D_Image *im);
+bool dharma_image_rotate_anticlockwise(D_Image *im);
+bool dharma_image_rotate_180(D_Image *im);
+
+bool dharma_image_flip_horizontally(D_Image *im);
+bool dharma_image_flip_vertically(D_Image *im);
+
 //Debug tools
 void dharma_image_print(D_Image *im);
 bool dharma_image_fill_canvas_sequential(D_Image *im);

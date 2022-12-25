@@ -48,6 +48,18 @@ void gui_templates_destroy(GtkWidget *w, gpointer data);
 void gui_templates_zoomin_button_handler(GtkWidget *w, gpointer d);
 void gui_templates_zoomout_button_handler(GtkWidget *w, gpointer d);
 
+void gui_templates_flip_image_horizontally_handler(GtkWidget *w, gpointer d);
+void gui_templates_flip_image_vertically_handler(GtkWidget *w, gpointer d);
+void gui_templates_flip_layer_horizontally_handler(GtkWidget *w, gpointer d);
+void gui_templates_flip_layer_vertically_handler(GtkWidget *w, gpointer d);
+
+void gui_templates_rotate_image_clockwise_handler(GtkWidget *w, gpointer d);
+void gui_templates_rotate_image_anticlockwise_handler(GtkWidget *w, gpointer d);
+void gui_templates_rotate_image_180_handler(GtkWidget *w, gpointer d);
+void gui_templates_rotate_layer_clockwise_handler(GtkWidget *w, gpointer d);
+void gui_templates_rotate_layer_anticlockwise_handler(GtkWidget *w, gpointer d);
+void gui_templates_rotate_layer_180_handler(GtkWidget *w, gpointer d);
+
 void canvas_mouse_handler(GtkWidget *event_box, GdkEventButton *event, gpointer data);
 
 #endif //__GUI_TEMPLATES_H_

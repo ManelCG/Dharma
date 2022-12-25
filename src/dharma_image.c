@@ -159,6 +159,13 @@ bool dharma_image_set_pixel_from_2Barray(D_Image *im, uint32_t x, uint32_t y, co
   return true;
 }
 
+/*********************
+ *
+ * Image Operations
+ *
+ *********************/
+
+
 bool dharma_image_fill_canvas(D_Image *im, uint64_t color){
   uint32_t i;
   uint32_t Bpp = im->bpp/8;
@@ -173,6 +180,105 @@ bool dharma_image_fill_canvas(D_Image *im, uint64_t color){
   for (i = 0; i < im->w * im->h; i++){
     memcpy(&im->data[i*Bpp], color_array, Bpp);
   }
+
+  return true;
+}
+
+bool dharma_image_rotate_clockwise(D_Image *im){
+  uint8_t *data = calloc(im->w * im->h * im->bpp, 1);
+  uint32_t aux;
+  uint32_t i, j, k;
+  uint32_t Bpp = im->bpp / 8;
+
+  for (j = 0; j < im->w; j++){
+  for (i = 0; i < im->h; i++){
+    for (k = 0; k < Bpp; k++){
+      data[(j*im->h + (im->h-i-1))*Bpp + k] = im->data[(i*im->w + j)*Bpp + k];
+    }
+  }
+  }
+
+  free(im->data);
+  im->data = data;
+
+  aux = im->h;
+  im->h = im->w;
+  im->w = aux;
+
+  return true;
+}
+bool dharma_image_rotate_anticlockwise(D_Image *im){
+  uint8_t *data = calloc(im->w * im->h * im->bpp, 1);
+  uint32_t aux;
+  uint32_t i, j, k;
+  uint32_t Bpp = im->bpp / 8;
+
+  for (j = 0; j < im->w; j++){
+  for (i = 0; i < im->h; i++){
+    for (k = 0; k < Bpp; k++){
+      data[((im->w -j -1)*im->h + i)*Bpp + k] = im->data[(i*im->w + j)*Bpp + k];
+    }
+  }
+  }
+
+  free(im->data);
+  im->data = data;
+
+  aux = im->h;
+  im->h = im->w;
+  im->w = aux;
+
+  return true;
+}
+bool dharma_image_rotate_180(D_Image *im){
+  uint8_t *data = calloc(im->w * im->h * im->bpp, 1);
+  uint32_t i, k;
+  uint32_t Bpp = im->bpp / 8;
+
+  for (i = 0; i < im->w * im->h; i++){
+    for (k = 0; k < Bpp; k++){
+      data[((im->w * im->h)-i -1)*Bpp + k] = im->data[i*Bpp + k];
+    }
+  }
+
+  free(im->data);
+  im->data = data;
+  return true;
+}
+
+bool dharma_image_flip_horizontally(D_Image *im){
+  uint8_t *data = calloc(im->w * im->h * im->bpp, 1);
+  uint32_t i, j, k;
+  uint32_t Bpp = im->bpp / 8;
+
+  for (j = 0; j < im->w; j++){
+  for (i = 0; i < im->h; i++){
+    for (k = 0; k < Bpp; k++){
+      data[(i*im->w + (im->w - j -1))*Bpp + k] = im->data[(i*im->w + j)*Bpp + k];
+    }
+  }
+  }
+
+  free(im->data);
+  im->data = data;
+
+  return true;
+}
+bool dharma_image_flip_vertically(D_Image *im){
+  uint8_t *data = calloc(im->w * im->h * im->bpp, 1);
+  uint32_t i, j, k;
+  uint32_t Bpp = im->bpp / 8;
+
+  for (j = 0; j < im->w; j++){
+  for (i = 0; i < im->h; i++){
+    for (k = 0; k < Bpp; k++){
+      data[((im->h -i -1)*im->w + j)*Bpp + k] = im->data[(i*im->w + j)*Bpp + k];
+    }
+  }
+  }
+
+  free(im->data);
+  im->data = data;
 
   return true;
 }

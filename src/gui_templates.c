@@ -1,4 +1,5 @@
 /*
+ *
  *  Dharma
  *  Copyright (C) 2022  Manel Castillo Giménez <manelcg@protonmail.com>
  *
@@ -77,6 +78,26 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
   GtkWidget *menu_editmenu;
   GtkWidget *menu_editMi;
 
+  GtkWidget *menu_flip_imageMi;
+  GtkWidget *menu_flip_layerMi;
+  GtkWidget *menu_flip_image_submenu;
+  GtkWidget *menu_flip_layer_submenu;
+  GtkWidget *menu_button_flip_image_horizontally;
+  GtkWidget *menu_button_flip_image_vertically;
+  GtkWidget *menu_button_flip_layer_horizontally;
+  GtkWidget *menu_button_flip_layer_vertically;
+
+  GtkWidget *menu_rotate_layerMi;
+  GtkWidget *menu_rotate_imageMi;
+  GtkWidget *menu_rotate_image_submenu;
+  GtkWidget *menu_rotate_layer_submenu;
+  GtkWidget *menu_button_rotate_image_clockwise;
+  GtkWidget *menu_button_rotate_image_anticlockwise;
+  GtkWidget *menu_button_rotate_image_180;
+  GtkWidget *menu_button_rotate_layer_clockwise;
+  GtkWidget *menu_button_rotate_layer_anticlockwise;
+  GtkWidget *menu_button_rotate_layer_180;
+
   //Help menu
   GtkWidget *menu_helpmenu;
   GtkWidget *menu_helpMi;
@@ -122,6 +143,154 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
   menu_editMi = gtk_menu_item_new_with_label("Edit");
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_menubar), menu_editMi);
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_editMi), menu_editmenu);
+
+  menu_flip_imageMi   = gtk_menu_item_new_with_label("Flip image");
+  menu_flip_layerMi   = gtk_menu_item_new_with_label("Flip layer");
+  menu_rotate_layerMi = gtk_menu_item_new_with_label("Rotate image");
+  menu_rotate_imageMi = gtk_menu_item_new_with_label("Rotate layer");
+
+  //Flips
+  {
+    GtkWidget *button = menu_button_flip_image_horizontally = gtk_image_menu_item_new_with_label("Flip image horizontally");
+    g_signal_connect(button, "activate", G_CALLBACK(gui_templates_flip_image_horizontally_handler), (gpointer) menu_menubar);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    #elif defined(_WIN32) || defined (WIN32)
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    #endif
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
+    gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
+  }
+  {
+    GtkWidget *button = menu_button_flip_image_vertically = gtk_image_menu_item_new_with_label("Flip image vertically");
+    g_signal_connect(button, "activate", G_CALLBACK(gui_templates_flip_image_vertically_handler), (gpointer) menu_menubar);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    #elif defined(_WIN32) || defined (WIN32)
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    #endif
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
+    gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
+  }
+  {
+    GtkWidget *button = menu_button_flip_layer_horizontally = gtk_image_menu_item_new_with_label("Flip layer horizontally");
+    g_signal_connect(button, "activate", G_CALLBACK(gui_templates_flip_layer_horizontally_handler), (gpointer) menu_menubar);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    #elif defined(_WIN32) || defined (WIN32)
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    #endif
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
+    gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
+  }
+  {
+    GtkWidget *button = menu_button_flip_layer_vertically = gtk_image_menu_item_new_with_label("Flip layer vertically");
+    g_signal_connect(button, "activate", G_CALLBACK(gui_templates_flip_layer_horizontally_handler), (gpointer) menu_menubar);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    #elif defined(_WIN32) || defined (WIN32)
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    #endif
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
+    gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
+  }
+
+  //Rotates
+  {
+    GtkWidget *button = menu_button_rotate_image_clockwise = gtk_image_menu_item_new_with_label("Rotate 90º Clockwise");
+    g_signal_connect(button, "activate", G_CALLBACK(gui_templates_rotate_image_clockwise_handler ), (gpointer) menu_menubar);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    #elif defined(_WIN32) || defined (WIN32)
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    #endif
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
+    gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
+  }
+  {
+    GtkWidget *button = menu_button_rotate_image_anticlockwise = gtk_image_menu_item_new_with_label("Rotate 90º Anti-clockwise");
+    g_signal_connect(button, "activate", G_CALLBACK(gui_templates_rotate_image_anticlockwise_handler ), (gpointer) menu_menubar);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    #elif defined(_WIN32) || defined (WIN32)
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    #endif
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
+    gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
+  }
+  {
+    GtkWidget *button = menu_button_rotate_image_180 = gtk_image_menu_item_new_with_label("Rotate 180º");
+    g_signal_connect(button, "activate", G_CALLBACK(gui_templates_rotate_image_180_handler ), (gpointer) menu_menubar);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    #elif defined(_WIN32) || defined (WIN32)
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    #endif
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
+    gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
+  }
+  {
+    GtkWidget *button = menu_button_rotate_layer_clockwise = gtk_image_menu_item_new_with_label("Rotate 90º Clockwise");
+    g_signal_connect(button, "activate", G_CALLBACK(gui_templates_rotate_layer_clockwise_handler ), (gpointer) menu_menubar);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    #elif defined(_WIN32) || defined (WIN32)
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    #endif
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
+    gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
+  }
+  {
+    GtkWidget *button = menu_button_rotate_layer_anticlockwise = gtk_image_menu_item_new_with_label("Rotate 90º Anti-clockwise");
+    g_signal_connect(button, "activate", G_CALLBACK(gui_templates_rotate_layer_anticlockwise_handler ), (gpointer) menu_menubar);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    #elif defined(_WIN32) || defined (WIN32)
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    #endif
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
+    gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
+  }
+  {
+    GtkWidget *button = menu_button_rotate_layer_180 = gtk_image_menu_item_new_with_label("Rotate 180º");
+    g_signal_connect(button, "activate", G_CALLBACK(gui_templates_rotate_layer_180_handler ), (gpointer) menu_menubar);
+    #ifdef __unix__
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    #elif defined(_WIN32) || defined (WIN32)
+    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    #endif
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
+    gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
+  }
+
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_flip_imageMi);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_flip_layerMi);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_rotate_layerMi);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_rotate_imageMi);
+
+  menu_flip_image_submenu = gtk_menu_new();
+  menu_flip_layer_submenu = gtk_menu_new();
+  menu_rotate_image_submenu = gtk_menu_new();
+  menu_rotate_layer_submenu = gtk_menu_new();
+
+  gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_flip_imageMi), menu_flip_image_submenu);
+  gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_flip_layerMi), menu_flip_layer_submenu);
+  gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_rotate_layerMi), menu_rotate_image_submenu);
+  gtk_menu_item_set_submenu(GTK_MENU_ITEM(menu_rotate_imageMi), menu_rotate_layer_submenu);
+
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_flip_image_submenu), menu_button_flip_image_horizontally);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_flip_image_submenu), menu_button_flip_image_vertically);
+
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_flip_layer_submenu), menu_button_flip_layer_horizontally);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_flip_layer_submenu), menu_button_flip_layer_vertically);
+
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_rotate_image_submenu), menu_button_rotate_image_clockwise);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_rotate_image_submenu), menu_button_rotate_image_anticlockwise);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_rotate_image_submenu), menu_button_rotate_image_180);
+
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_rotate_layer_submenu), menu_button_rotate_layer_clockwise);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_rotate_layer_submenu), menu_button_rotate_layer_anticlockwise);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_rotate_layer_submenu), menu_button_rotate_layer_180);
 
   //Help submenu
   menu_helpMi = gtk_menu_item_new_with_label("Help");
@@ -607,6 +776,88 @@ void gui_templates_destroy(GtkWidget *w, gpointer data){
  * HANDLERS
  *
  **********/
+
+void gui_templates_flip_image_horizontally_handler(GtkWidget *w, gpointer d){
+  D_Session *s = dharma_session_get_selected_session();
+  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
+  (void) w;
+  if (dharma_session_flip_horizontally(s)){
+    draw_main_window(window_root, NULL);
+  }
+}
+void gui_templates_flip_image_vertically_handler(GtkWidget *w, gpointer d){
+  D_Session *s = dharma_session_get_selected_session();
+  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
+  (void) w;
+  if (dharma_session_flip_vertically(s)){
+    draw_main_window(window_root, NULL);
+  }
+}
+void gui_templates_flip_layer_horizontally_handler(GtkWidget *w, gpointer d){
+  D_Image *im = dharma_session_get_selected_layer(dharma_session_get_selected_session());
+  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
+  (void) w;
+  if (dharma_image_flip_horizontally(im)){
+    draw_main_window(window_root, NULL);
+  }
+}
+void gui_templates_flip_layer_vertically_handler(GtkWidget *w, gpointer d){
+  D_Image *im = dharma_session_get_selected_layer(dharma_session_get_selected_session());
+  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
+  (void) w;
+  if (dharma_image_flip_vertically(im)){
+    draw_main_window(window_root, NULL);
+  }
+}
+
+void gui_templates_rotate_image_clockwise_handler(GtkWidget *w, gpointer d){
+  D_Session *s = dharma_session_get_selected_session();
+  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
+  (void) w;
+  if (dharma_session_rotate_clockwise(s)){
+    draw_main_window(window_root, NULL);
+  }
+}
+void gui_templates_rotate_image_anticlockwise_handler(GtkWidget *w, gpointer d){
+  D_Session *s = dharma_session_get_selected_session();
+  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
+  (void) w;
+  if (dharma_session_rotate_anticlockwise(s)){
+    draw_main_window(window_root, NULL);
+  }
+}
+void gui_templates_rotate_image_180_handler(GtkWidget *w, gpointer d){
+  D_Session *s = dharma_session_get_selected_session();
+  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
+  (void) w;
+  if (dharma_session_rotate_180(s)){
+    draw_main_window(window_root, NULL);
+  }
+}
+void gui_templates_rotate_layer_clockwise_handler(GtkWidget *w, gpointer d){
+  D_Image *im = dharma_session_get_selected_layer(dharma_session_get_selected_session());
+  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
+  (void) w;
+  if (dharma_image_rotate_clockwise(im)){
+    draw_main_window(window_root, NULL);
+  }
+}
+void gui_templates_rotate_layer_anticlockwise_handler(GtkWidget *w, gpointer d){
+  D_Image *im = dharma_session_get_selected_layer(dharma_session_get_selected_session());
+  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
+  (void) w;
+  if (dharma_image_rotate_anticlockwise(im)){
+    draw_main_window(window_root, NULL);
+  }
+}
+void gui_templates_rotate_layer_180_handler(GtkWidget *w, gpointer d){
+  D_Image *im = dharma_session_get_selected_layer(dharma_session_get_selected_session());
+  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
+  (void) w;
+  if (dharma_image_rotate_180(im)){
+    draw_main_window(window_root, NULL);
+  }
+}
 
 void gui_templates_zoomout_button_handler(GtkWidget *widget, gpointer data){
   (void) widget;

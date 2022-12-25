@@ -76,10 +76,21 @@ bool dharma_session_set_filename(D_Session *s, const char *name);
 
 bool dharma_session_is_image_valid(D_Session *s, D_Image *im);
 
+D_Session *dharma_session_get_selected_session();
+D_Image  *dharma_session_get_selected_layer(D_Session *s);
+
 //Layer vector manipulation
 bool dharma_session_add_layer_from_image(D_Session *s, D_Image *im);
 bool dharma_session_add_layer(D_Session *s);
 bool dharma_session_remove_layer(D_Session *s, uint32_t index);
+
+//Session image operations
+bool dharma_session_rotate_clockwise(D_Session *s);
+bool dharma_session_rotate_anticlockwise(D_Session *s);
+bool dharma_session_rotate_180(D_Session *s);
+
+bool dharma_session_flip_horizontally(D_Session *s);
+bool dharma_session_flip_vertically(D_Session *s);
 
 //Debug functions
 void dharma_sessions_print_all();
