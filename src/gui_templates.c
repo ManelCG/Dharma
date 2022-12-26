@@ -816,13 +816,11 @@ void gui_templates_canvas_horizontal_adjustment_value_changed_handler(GtkAdjustm
   uint32_t cropw = dharma_session_get_cropw(s);
   uint32_t width = dharma_session_get_width(s);
 
-  if (width - cropw == 0){
-    return;
-  }
-
   printf("Cropw: %d\n", cropw);
   printf("Value: %d\n", value);
-  value = (value * width) / (width - cropw/2);
+  if (width - cropw/2 != 0){
+    value = (value * width) / (width - cropw/2);
+  }
   printf("New center: %d\n", value);
 
   if (value < width){
@@ -836,11 +834,9 @@ void gui_templates_canvas_vertical_adjustment_value_changed_handler(GtkAdjustmen
   uint32_t croph = dharma_session_get_croph(s);
   uint32_t height = dharma_session_get_height(s);
 
-  if (height - croph == 0){
-    return;
+  if (height - croph/2 != 0){
+    value = (value * height) / (height - croph/2);
   }
-
-  value = (value * height) / (height - croph/2);
 
   if (value < height){
     dharma_session_set_centery(s, value);
