@@ -60,6 +60,9 @@ void gui_templates_rotate_layer_clockwise_handler(GtkWidget *w, gpointer d);
 void gui_templates_rotate_layer_anticlockwise_handler(GtkWidget *w, gpointer d);
 void gui_templates_rotate_layer_180_handler(GtkWidget *w, gpointer d);
 
+void gui_templates_canvas_vertical_adjustment_value_changed_handler(GtkAdjustment *adj, gpointer d);
+void gui_templates_canvas_horizontal_adjustment_value_changed_handler(GtkAdjustment *adj, gpointer d);
+
 void canvas_mouse_handler(GtkWidget *event_box, GdkEventButton *event, gpointer data);
 
 #endif //__GUI_TEMPLATES_H_

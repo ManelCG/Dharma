@@ -61,11 +61,19 @@ uint32_t dharma_session_get_Bpp(D_Session *s);
 void dharma_session_get_center(D_Session *s, uint32_t *x, uint32_t *y);
 bool dharma_session_set_center(D_Session *s, uint32_t x, uint32_t y);
 bool dharma_session_offset_center(D_Session *s, int32_t x, int32_t y);
+bool dharma_session_set_centerx(D_Session *s, uint32_t c);
+bool dharma_session_set_centery(D_Session *s, uint32_t c);
+uint32_t dharma_session_get_centerx(D_Session *s);
+uint32_t dharma_session_get_centery(D_Session *s);
+bool dharma_session_offset_centerx(D_Session *s, uint32_t o);
+bool dharma_session_offset_centery(D_Session *s, uint32_t o);
 
 void dharma_session_set_gtk_image(D_Session *s, void *image);
 void *dharma_session_get_gtk_image(D_Session *s);
 void dharma_session_set_gtk_box(D_Session *s, void *box);
 void *dharma_session_get_gtk_box(D_Session *s);
+void dharma_session_set_gtk_da(D_Session *s, void *da);
+void *dharma_session_get_gtk_da(D_Session *s);
 
 D_Image *dharma_session_get_layer(D_Session *s, uint32_t layer);
 
@@ -73,6 +81,11 @@ const char *dharma_session_get_path(D_Session *s);
 bool dharma_session_set_path(D_Session *s, const char *name);
 const char *dharma_session_get_filename(D_Session *s);
 bool dharma_session_set_filename(D_Session *s, const char *name);
+
+void dharma_session_set_cropw(D_Session *s, uint32_t cropw);
+void dharma_session_set_croph(D_Session *s, uint32_t croph);
+uint32_t dharma_session_get_cropw(D_Session *s);
+uint32_t dharma_session_get_croph(D_Session *s);
 
 bool dharma_session_is_image_valid(D_Session *s, D_Image *im);
 

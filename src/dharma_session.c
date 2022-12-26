@@ -41,10 +41,14 @@ typedef struct D_Session {
   float spanX;
   float spanY;
 
+  uint32_t cropw;
+  uint32_t croph;
+
   float scale;
 
   void *gtk_image;
   void *gtk_box;
+  void *gtk_da;
 
   void *gtk_hadj;
   void *gtk_vadj;
@@ -69,6 +73,9 @@ D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp){
   s->h = h;
   s->bpp = bpp;
 
+  s->cropw = w;
+  s->croph = h;
+
   s->spanX = w;
   s->spanY = h;
 
@@ -77,6 +84,7 @@ D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp){
 
   s->gtk_image = NULL;
   s->gtk_box = NULL;
+  s->gtk_da = NULL;
 
   s->gtk_hadj = NULL;
   s->gtk_vadj = NULL;
@@ -215,6 +223,12 @@ bool dharma_sessions_destroy_all(){
  *
  *********/
 
+uint32_t dharma_session_get_cropw(D_Session *s){
+  return s->cropw;
+}
+uint32_t dharma_session_get_croph(D_Session *s){
+  return s->croph;
+}
 void *dharma_session_get_hadj(D_Session *s){
   return s->gtk_hadj;
 }
@@ -231,8 +245,47 @@ void dharma_session_get_center(D_Session *s, uint32_t *x, uint32_t *y){
   *x = s->centerx;
   *y = s->centery;
 }
+bool dharma_session_set_centerx(D_Session *s, uint32_t c){
+  if ((int32_t) s->centerx < 0 || s->centerx >= s->w){
+    return false;
+  }
+
+  s->centerx = c;
+  return true;
+}
+bool dharma_session_set_centery(D_Session *s, uint32_t c){
+  if ((int32_t) s->centery < 0 || s->centery >= s->h){
+    return false;
+  }
+
+  s->centery = c;
+  return true;
+}
+uint32_t dharma_session_get_centerx(D_Session *s){
+  return s->centerx;
+}
+uint32_t dharma_session_get_centery(D_Session *s){
+  return s->centery;
+}
+bool dharma_session_offset_centerx(D_Session *s, uint32_t x){
+  if ((int32_t) x + (int32_t) s->centerx < 0 || x + s->centerx >= s->w){
+    return false;
+  }
+  s->centerx = x + s->centerx;
+  return true;
+}
+bool dharma_session_offset_centery(D_Session *s, uint32_t y){
+  if ((int32_t) y + (int32_t) s->centery < 0 || y + s->centery >= s->h){
+    return false;
+  }
+  s->centery = y + s->centery;
+  return true;
+}
 void *dharma_session_get_gtk_box(D_Session *s){
   return s->gtk_box;
+}
+void *dharma_session_get_gtk_da(D_Session *s){
+  return s->gtk_da;
 }
 void *dharma_session_get_gtk_image(D_Session *s){
   return s->gtk_image;
@@ -340,6 +393,9 @@ void dharma_session_set_vadj(D_Session *s, void *adj){
 void dharma_session_set_gtk_box(D_Session *s, void *box){
   s->gtk_box = box;
 }
+void dharma_session_set_gtk_da(D_Session *s, void *da){
+  s->gtk_da = da;
+}
 void dharma_session_set_gtk_image(D_Session *s, void *image){
   s->gtk_image = image;
 }
@@ -349,6 +405,12 @@ void dharma_session_set_spanx(D_Session *s, float span){
 }
 void dharma_session_set_spany(D_Session *s, float span){
   s->spanY = span;
+}
+void dharma_session_set_cropw(D_Session *s, uint32_t cropw){
+  s->cropw = cropw;
+}
+void dharma_session_set_croph(D_Session *s, uint32_t croph){
+  s->croph = croph;
 }
 
 bool dharma_session_set_scale(D_Session *s, float scale){

@@ -25,6 +25,8 @@
 
 #include <file_io.h>
 
+#include <math.h>
+
 #ifdef __unix__
 
 #elif defined(_WIN32) || defined (WIN32)
@@ -489,11 +491,20 @@ GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t da_width, ui
   dharma_session_set_spanx(s, cropw);
   dharma_session_set_spany(s, croph);
   hadj = (GtkAdjustment *) dharma_session_get_hadj(s);
-  gtk_adjustment_set_page_size(hadj, cropw);
-  gtk_adjustment_set_value(hadj, MIN(MAX(centerx - cropw/2, 0), width));
   vadj = (GtkAdjustment *) dharma_session_get_vadj(s);
+  gtk_adjustment_set_page_size(hadj, cropw);
   gtk_adjustment_set_page_size(vadj, croph);
-  gtk_adjustment_set_value(vadj, MIN(MAX(centery - croph/2, 0), height));
+  gtk_adjustment_set_upper(hadj, width + cropw/2);
+  gtk_adjustment_set_upper(vadj, height + croph/2);
+
+  // if (width - cropw != 0){
+  //   gtk_adjustment_set_value(hadj, MIN(MAX(centerx * (width - cropw/2) /  width + 1, 0), width));
+  // }
+  // if (height - croph != 0){
+  //   gtk_adjustment_set_value(vadj, MIN(MAX(centery * (height - croph/2) / height + 1, 0), height));
+  // }
+
+  // value = (value * width) / (width - cropw);
 
   //Start cropping image leaving center in the middle
   cropx = (float) centerx - cropw/2;
@@ -506,6 +517,8 @@ GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t da_width, ui
   cropy = MIN(cropy, (float) height - croph);
 
   pixbuf_cropped = gdk_pixbuf_new_subpixbuf(pixbuf, cropx, cropy, cropw, croph);
+  dharma_session_set_cropw(s, (uint32_t) cropw);
+  dharma_session_set_croph(s, (uint32_t) croph);
 
   //STEP 3: SCALE PIXBUF
   //Sizes after scaling and cropping
@@ -546,6 +559,9 @@ gboolean on_window_draw(GtkWidget *da, GdkEvent *event, gpointer data){
   uint32_t draww, drawh;
   float drawx, drawy;
 
+  cairo_surface_t *transparency_grid_image;
+  cairo_pattern_t *transparency_grid_pattern;
+
   GtkAllocation *alloc = g_new(GtkAllocation, 1);
   gtk_widget_get_allocation(da, alloc);
   da_centerx = alloc->width/2;
@@ -554,6 +570,10 @@ gboolean on_window_draw(GtkWidget *da, GdkEvent *event, gpointer data){
   cairo_t *cr;
   cr = gdk_cairo_create(gtk_widget_get_window(da));
 
+  //Draw background color
+  cairo_rectangle(cr, 0, 0, alloc->width, alloc->height);
+  cairo_set_source_rgb(cr, 0.36, 0.36, 0.36);
+  cairo_fill(cr);
 
   GdkPixbuf *pixbuf;
   pixbuf = gui_templates_pixbuf_from_session(session, alloc->width, alloc->height, &im_centerx, &im_centery);
@@ -574,10 +594,21 @@ gboolean on_window_draw(GtkWidget *da, GdkEvent *event, gpointer data){
   // drawx += ((float) pixbuf_w/2 - (float) im_centerx);
   // drawy += ((float) pixbuf_h/2 - (float) im_centery);
 
+  //Draw background transparency grid
+  transparency_grid_image = cairo_image_surface_create_from_png("assets/inapp_assets/transparent_grid.png");
+  transparency_grid_pattern = cairo_pattern_create_for_surface(transparency_grid_image);
+  cairo_pattern_set_extend(transparency_grid_pattern, CAIRO_EXTEND_REPEAT);
+  cairo_set_source(cr, transparency_grid_pattern);
+  cairo_rectangle(cr, drawx, drawy, draww, drawh);
+  cairo_fill(cr);
+
+  //Draw pixbuf
   gdk_cairo_set_source_pixbuf(cr, pixbuf, drawx, drawy);
   cairo_rectangle(cr, drawx, drawy, draww, drawh);
   cairo_fill(cr);
 
+  cairo_pattern_destroy(transparency_grid_pattern);
+  cairo_surface_destroy(transparency_grid_image);
   cairo_destroy(cr);
   g_free(alloc);
   g_object_unref(pixbuf);
@@ -591,6 +622,8 @@ GtkWidget *gui_templates_get_canvas_from_session(D_Session *s){
 
   da = gtk_drawing_area_new();
   g_signal_connect(da, "draw", G_CALLBACK(on_window_draw), (gpointer) s);
+
+  dharma_session_set_gtk_da(s, da);
 
   event_box = gtk_event_box_new();
   g_signal_connect(G_OBJECT(event_box), "motion-notify-event",  G_CALLBACK(canvas_mouse_handler), (gpointer) s);
@@ -627,16 +660,13 @@ void gui_templates_pack_box_with_session(D_Session *session, GtkWidget *session_
   session_canvas = gui_templates_get_canvas_from_session(session);
   gtk_box_pack_start(GTK_BOX(hbox), session_canvas, true, true, 0);
 
-  //TODO: catch scrollbar movement
-  //g_signal_connect(vertical_adjustment, "value_changed", HANDLER, (gpointer) session);
-
-  vertical_adjustment = gtk_adjustment_new(cy, 0, h, 1, h, spany);
+  vertical_adjustment = gtk_adjustment_new(cy, 0, h + spany/2, 1, h, spany);
   vertical_scrollbar = gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, vertical_adjustment);
   gtk_box_pack_start(GTK_BOX(hbox), vertical_scrollbar, false, false, 0);
 
   gtk_box_pack_start(GTK_BOX(session_vbox), hbox, true, true, 0);
 
-  horizontal_adjustment = gtk_adjustment_new(cx, 0, w, 1, w, spanx);
+  horizontal_adjustment = gtk_adjustment_new(cx, 0, w + spanx/2, 1, w, spanx);
   horizontal_scrollbar = gtk_scrollbar_new(GTK_ORIENTATION_HORIZONTAL, horizontal_adjustment);
   gtk_box_pack_start(GTK_BOX(session_vbox), horizontal_scrollbar, false, false, 0);
 
@@ -648,6 +678,9 @@ void gui_templates_pack_box_with_session(D_Session *session, GtkWidget *session_
 
   session_viewmode_toolbar = gui_templates_get_viewmode_toolbar(session);
   gtk_box_pack_start(GTK_BOX(session_vbox), session_viewmode_toolbar, false, false, 0);
+
+  g_signal_connect(horizontal_adjustment, "value_changed", G_CALLBACK(gui_templates_canvas_horizontal_adjustment_value_changed_handler), (gpointer) session);
+  g_signal_connect(vertical_adjustment, "value_changed", G_CALLBACK(gui_templates_canvas_vertical_adjustment_value_changed_handler), (gpointer) session);
 }
 
 GtkWidget *gui_templates_get_sessions_notebook(){
@@ -777,6 +810,43 @@ void gui_templates_destroy(GtkWidget *w, gpointer data){
  *
  **********/
 
+void gui_templates_canvas_horizontal_adjustment_value_changed_handler(GtkAdjustment *adj, gpointer d){
+  D_Session *s = (D_Session *) d;
+  uint32_t value = gtk_adjustment_get_value(adj);
+  uint32_t cropw = dharma_session_get_cropw(s);
+  uint32_t width = dharma_session_get_width(s);
+
+  if (width - cropw == 0){
+    return;
+  }
+
+  printf("Cropw: %d\n", cropw);
+  printf("Value: %d\n", value);
+  value = (value * width) / (width - cropw/2);
+  printf("New center: %d\n", value);
+
+  if (value < width){
+    dharma_session_set_centerx(s, value);
+    on_window_draw(dharma_session_get_gtk_da(s), NULL, (gpointer) s);
+  }
+}
+void gui_templates_canvas_vertical_adjustment_value_changed_handler(GtkAdjustment *adj, gpointer d){
+  D_Session *s = (D_Session *) d;
+  uint32_t value = gtk_adjustment_get_value(adj);
+  uint32_t croph = dharma_session_get_croph(s);
+  uint32_t height = dharma_session_get_height(s);
+
+  if (height - croph == 0){
+    return;
+  }
+
+  value = (value * height) / (height - croph/2);
+
+  if (value < height){
+    dharma_session_set_centery(s, value);
+    on_window_draw(dharma_session_get_gtk_da(s), NULL, (gpointer) s);
+  }
+}
 void gui_templates_flip_image_horizontally_handler(GtkWidget *w, gpointer d){
   D_Session *s = dharma_session_get_selected_session();
   GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
