@@ -92,6 +92,9 @@ bool dharma_session_is_image_valid(D_Session *s, D_Image *im);
 D_Session *dharma_session_get_selected_session();
 D_Image  *dharma_session_get_selected_layer(D_Session *s);
 
+D_Image *dharma_session_get_layer_sum(D_Session *s);
+bool dharma_session_update_layer_sum(D_Session *s, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+
 //Layer vector manipulation
 bool dharma_session_add_layer_from_image(D_Session *s, D_Image *im);
 bool dharma_session_add_layer(D_Session *s);

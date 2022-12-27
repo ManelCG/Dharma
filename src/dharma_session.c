@@ -24,6 +24,9 @@
 #include <dharma_session.h>
 #include <dharma_image.h>
 
+#define MIN(x, y) x > y? y : x
+#define MAX(x, y) x > y? x : y
+
 //Structure deffinitions
 typedef struct D_Session {
   uint32_t ID;
@@ -56,6 +59,7 @@ typedef struct D_Session {
   uint32_t nlayers;
   uint32_t selected_layer;
   D_Image **layers;
+  D_Image *layer_sum;
 } D_Session;
 
 //Global variables
@@ -64,7 +68,7 @@ D_Session **sessions = NULL;
 uint32_t selected_session = 0;
 
 //Constructors
-D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp){
+D_Session *dharma_session_new_private(uint32_t w, uint32_t h, uint32_t bpp){
   D_Session *s = malloc(sizeof(D_Session));
 
   s->path = NULL;
@@ -89,13 +93,7 @@ D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp){
   s->gtk_hadj = NULL;
   s->gtk_vadj = NULL;
 
-  s->selected_layer = 0;
-
-  //All new sessions have a white canvas by default
-  D_Image *im = dharma_image_new_blank(w, h, bpp);
-  s->layers = malloc(sizeof(D_Image *));
-  s->layers[0] = im;
-  s->nlayers = 1;
+  s->layer_sum = NULL;
 
   s->scale = 1;
 
@@ -112,47 +110,57 @@ D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp){
 
   return s;
 }
+D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp){
+  D_Session *s = dharma_session_new_private(w, h, bpp);
+  //All new sessions have a white canvas by default
+  D_Image *im = dharma_image_new_blank(w, h, bpp);
+  s->layers = malloc(sizeof(D_Image *));
+  s->layers[0] = im;
+  s->nlayers = 1;
+  s->selected_layer = 0;
+
+  D_Image *layer_sum = dharma_image_new_empty(w, h, bpp);
+  s->layer_sum = malloc(sizeof(D_Image *));
+  s->layer_sum = layer_sum;
+  dharma_session_update_layer_sum(s, 0, 0, w, h);
+
+  return s;
+}
 
 //Constructors
 D_Session *dharma_session_new_from_data(uint8_t *data, uint32_t w, uint32_t h, uint32_t bpp){
-  D_Session *s = malloc(sizeof(D_Session));
-
-  s->path = NULL;
-  s->filename = NULL;
-  s->w = w;
-  s->h = h;
-  s->bpp = bpp;
-
-  s->spanX = w;
-  s->spanY = h;
-
-  s->centerx = w/2;
-  s->centery = h/2;
-
-  s->gtk_image = NULL;
-  s->gtk_box = NULL;
-
-  s->gtk_hadj = NULL;
-  s->gtk_vadj = NULL;
-
-
+  D_Session *s = dharma_session_new_private(w, h, bpp);
   D_Image *im = dharma_image_new_from_data(data, w, h, bpp);
   s->layers = malloc(sizeof(D_Image *));
   s->layers[0] = im;
   s->nlayers = 1;
+  s->selected_layer = 0;
 
-  s->scale = 1;
+  im = dharma_image_new_from_data(data, w, h, bpp);
+  dharma_session_add_layer_from_image(s, im);
+  // im = dharma_image_new_from_data(data, w, h, bpp);
+  // dharma_session_add_layer_from_image(s, im);
+  // im = dharma_image_new_from_data(data, w, h, bpp);
+  // dharma_session_add_layer_from_image(s, im);
+  // im = dharma_image_new_from_data(data, w, h, bpp);
+  // dharma_session_add_layer_from_image(s, im);
+  // im = dharma_image_new_from_data(data, w, h, bpp);
+  // dharma_session_add_layer_from_image(s, im);
+  // im = dharma_image_new_from_data(data, w, h, bpp);
+  // dharma_session_add_layer_from_image(s, im);
+  // im = dharma_image_new_from_data(data, w, h, bpp);
+  // dharma_session_add_layer_from_image(s, im);
+  // im = dharma_image_new_from_data(data, w, h, bpp);
+  // dharma_session_add_layer_from_image(s, im);
+  // im = dharma_image_new_from_data(data, w, h, bpp);
+  // dharma_session_add_layer_from_image(s, im);
+  // im = dharma_image_new_from_data(data, w, h, bpp);
+  // dharma_session_add_layer_from_image(s, im);
 
-  s->ID = nsessions;
-
-  //Allocate space for a new session in sessions array and add it
-  if (sessions == NULL){
-    sessions = malloc(sizeof(D_Session *));
-  } else {
-    sessions = realloc(sessions, sizeof(D_Session *) * (nsessions + 1));
-  }
-  sessions[nsessions] = s;
-  nsessions++;
+  D_Image *layer_sum = dharma_image_new_empty(w, h, bpp);
+  s->layer_sum = malloc(sizeof(D_Image *));
+  s->layer_sum = layer_sum;
+  dharma_session_update_layer_sum(s, 0, 0, w, h);
 
   return s;
 }
@@ -178,10 +186,16 @@ bool dharma_session_destroy_from_id(uint32_t id){
   for (i = 0; i < s->nlayers; i++){
     dharma_image_destroy(s->layers[i]);
   }
+  if (s->layer_sum != NULL){
+    dharma_image_destroy(s->layer_sum);
+  }
 
   //Free all session struct members
   if (s->filename != NULL){
     free((char *) s->filename);
+  }
+  if (s->path != NULL){
+    free((char *) s->path);
   }
   free(s->layers);
   free(s);
@@ -223,6 +237,9 @@ bool dharma_sessions_destroy_all(){
  *
  *********/
 
+D_Image *dharma_session_get_layer_sum(D_Session *s){
+  return s->layer_sum;
+}
 uint32_t dharma_session_get_cropw(D_Session *s){
   return s->cropw;
 }
@@ -520,6 +537,68 @@ bool dharma_session_remove_layer(D_Session *s, uint32_t index){
  *
  ********************/
 
+uint8_t sum_opacities(uint8_t a1, uint8_t a2){
+  return (a1 + a2) - (a1 * a2) / 255;
+}
+uint8_t sum_colors(uint8_t c1, uint8_t c2, uint8_t p1, uint8_t p2){
+  float fp1 = (float) p1/255;
+  float fp2 = (float) p2/255;
+
+  return (fp1*c1 + fp2*c2 - fp1*fp2*c2)/(fp1+fp2 - (fp1*fp2));
+}
+
+bool dharma_session_update_layer_sum(D_Session *s, uint32_t x, uint32_t y, uint32_t w, uint32_t h){
+  uint32_t i, j, k, Bpp;
+  int32_t layer;
+  uint8_t *data_sum, *data_layer;
+
+  if (x > s->w || y > s->h || x + w > s->w || y + h > s->h){
+    return false;
+  }
+
+  Bpp = s->bpp / 8;
+  data_sum = dharma_image_get_data(s->layer_sum);
+
+  //Clear area
+  for (i = y; i < y+h; i++){
+  for (j = x; j < x+w; j++){
+    for (k = 0; k < Bpp; k++){
+      data_sum[(i*s->w + j)*Bpp + k] = 0;
+    }
+  }
+  }
+
+  //Update area
+  if (Bpp == 2 || Bpp == 4 || Bpp == 8){
+    for (layer = s->nlayers-1; layer >= 0; layer--){
+      data_layer = dharma_image_get_data(s->layers[layer]);
+      for (i = y; i < y+h; i++){
+      for (j = x; j < x+w; j++){
+        //If data_sum is already 255 opacity we stop calculating
+        if (data_sum[(i*s->w + j) * Bpp + (Bpp -1)] != 255){
+          // Pixel colors
+          for (k = 0; k < Bpp-1; k++){
+            data_sum[(i*s->w + j)*Bpp + k] = MIN(sum_colors(data_sum[(i*s->w + j)*Bpp + k], data_layer[(i*s->w + j)*Bpp + k], data_sum[(i*s->w + j)*Bpp + (Bpp-1)], data_layer[(i*s->w + j)*Bpp + (Bpp-1)]), 255);
+          }
+          //Opacity
+          data_sum[(i*s->w + j)*Bpp + (Bpp-1)] = MIN(sum_opacities(data_sum[(i*s->w + j)*Bpp + (Bpp-1)], data_layer[(i*s->w + j)*Bpp + (Bpp-1)]), 255);
+        }
+      }
+      }
+    }
+  } else {
+    data_layer = dharma_image_get_data(s->layers[s->nlayers-1]);
+    for (i = y; i < y+h; i++){
+    for (j = x; j < x+w; j++){
+      for (k = 0; k < Bpp; k++){
+        data_sum[(i*s->w + j)*Bpp + k] = data_layer[(i*s->w + j)*Bpp + k];
+      }
+    }
+    }
+  }
+
+  return true;
+}
 bool dharma_session_rotate_clockwise(D_Session *s){
   uint32_t aux;
   for (uint32_t i = 0; i < s->nlayers; i++){

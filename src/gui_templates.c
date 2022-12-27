@@ -1,5 +1,6 @@
 /*
  *
+ *
  *  Dharma
  *  Copyright (C) 2022  Manel Castillo Giménez <manelcg@protonmail.com>
  *
@@ -434,7 +435,7 @@ GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t da_width, ui
 
 
   //STEP 1: GENERATE FULL PIXBUF
-  D_Image *im = dharma_session_get_layer(s, 0);
+  D_Image *im = dharma_session_get_layer_sum(s);
   uint8_t *data = dharma_image_get_data(im);
 
   float scale;
@@ -487,6 +488,9 @@ GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t da_width, ui
   cropw = MIN(width,  ((float) da_width  / scale) +2);
   croph = MIN(height, ((float) da_height / scale) +2);
 
+  dharma_session_set_cropw(s, (uint32_t) cropw);
+  dharma_session_set_croph(s, (uint32_t) croph);
+
   //Information for drawing scrollbars
   dharma_session_set_spanx(s, cropw);
   dharma_session_set_spany(s, croph);
@@ -497,14 +501,13 @@ GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t da_width, ui
   gtk_adjustment_set_upper(hadj, width + cropw/2);
   gtk_adjustment_set_upper(vadj, height + croph/2);
 
-  // if (width - cropw != 0){
-  //   gtk_adjustment_set_value(hadj, MIN(MAX(centerx * (width - cropw/2) /  width + 1, 0), width));
-  // }
-  // if (height - croph != 0){
-  //   gtk_adjustment_set_value(vadj, MIN(MAX(centery * (height - croph/2) / height + 1, 0), height));
-  // }
 
-  // value = (value * width) / (width - cropw);
+  if (width != cropw){
+    gtk_adjustment_set_value(hadj, MIN(MAX(centerx * (width - cropw/2) /  width + 1, 0), width));
+  }
+  if (height != croph){
+    gtk_adjustment_set_value(vadj, MIN(MAX(centery * (height - croph/2) / height + 1, 0), height));
+  }
 
   //Start cropping image leaving center in the middle
   cropx = (float) centerx - cropw/2;
@@ -517,8 +520,6 @@ GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t da_width, ui
   cropy = MIN(cropy, (float) height - croph);
 
   pixbuf_cropped = gdk_pixbuf_new_subpixbuf(pixbuf, cropx, cropy, cropw, croph);
-  dharma_session_set_cropw(s, (uint32_t) cropw);
-  dharma_session_set_croph(s, (uint32_t) croph);
 
   //STEP 3: SCALE PIXBUF
   //Sizes after scaling and cropping
@@ -661,12 +662,14 @@ void gui_templates_pack_box_with_session(D_Session *session, GtkWidget *session_
   gtk_box_pack_start(GTK_BOX(hbox), session_canvas, true, true, 0);
 
   vertical_adjustment = gtk_adjustment_new(cy, 0, h + spany/2, 1, h, spany);
+  gtk_adjustment_set_value(vertical_adjustment, MIN(MAX(cy - h/4, 0), h));
   vertical_scrollbar = gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, vertical_adjustment);
   gtk_box_pack_start(GTK_BOX(hbox), vertical_scrollbar, false, false, 0);
 
   gtk_box_pack_start(GTK_BOX(session_vbox), hbox, true, true, 0);
 
   horizontal_adjustment = gtk_adjustment_new(cx, 0, w + spanx/2, 1, w, spanx);
+  gtk_adjustment_set_value(horizontal_adjustment, MIN(MAX(cx - w/4, 0), w));
   horizontal_scrollbar = gtk_scrollbar_new(GTK_ORIENTATION_HORIZONTAL, horizontal_adjustment);
   gtk_box_pack_start(GTK_BOX(session_vbox), horizontal_scrollbar, false, false, 0);
 
@@ -816,12 +819,9 @@ void gui_templates_canvas_horizontal_adjustment_value_changed_handler(GtkAdjustm
   uint32_t cropw = dharma_session_get_cropw(s);
   uint32_t width = dharma_session_get_width(s);
 
-  printf("Cropw: %d\n", cropw);
-  printf("Value: %d\n", value);
   if (width - cropw/2 != 0){
     value = (value * width) / (width - cropw/2);
   }
-  printf("New center: %d\n", value);
 
   if (value < width){
     dharma_session_set_centerx(s, value);
