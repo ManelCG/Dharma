@@ -91,6 +91,9 @@ uint32_t dharma_session_get_croph(D_Session *s);
 bool dharma_session_is_image_valid(D_Session *s, D_Image *im);
 
 D_Session *dharma_session_get_selected_session();
+uint32_t dharma_session_get_selected_session_index();
+bool dharma_session_set_selected_session(uint32_t index);
+
 D_Image  *dharma_session_get_selected_layer(D_Session *s);
 uint32_t dharma_session_get_selected_layer_index(D_Session *s);
 bool dharma_session_set_selected_layer(D_Session *d, uint32_t index);

@@ -47,11 +47,15 @@ D_Session *gui_templates_open_file();
 void gui_templates_clear_container(GtkWidget *container);
 void gui_templates_destroy(GtkWidget *w, gpointer data);
 
-void gui_templates_update_layers_window(GtkWidget *window, D_Session *s);
+void gui_templates_update_layers_window(D_Session *s);
 void gui_templates_update_session_and_redraw(D_Session *s);
 
 
+void gui_templates_set_window_layers(GtkWidget *w);
+
 //Handlers
+void gui_templates_notebook_switch_page_handler(GtkWidget *notebook, GtkWidget *page, uint32_t pagenum, gpointer data);
+
 void gui_templates_new_layer_button_handler(GtkWidget *w, gpointer d);
 void gui_templates_remove_layer_button_handler(GtkWidget *w, gpointer d);
 

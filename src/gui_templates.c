@@ -34,6 +34,15 @@
 #include <windows.h>
 #endif
 
+/******************
+ *
+ * GLOBAL VARIABLES
+ *
+ *****************/
+
+GtkWidget *_window_layers = NULL;
+GtkWidget *_notebook = NULL;
+
 /*******************
  *
  * DRAWING FUNCTIONS
@@ -480,6 +489,8 @@ void gui_templates_new_file_window(GtkWidget *w_unused, gpointer data){
     (void) s;
 
     draw_main_window(window_root, NULL);
+    gtk_notebook_set_current_page(GTK_NOTEBOOK(_notebook), dharma_session_get_nsessions() -1);
+    gui_templates_update_layers_window(s);
 
     gui_templates_destroy(dialog, dialog);
   } else {
@@ -823,7 +834,7 @@ GtkWidget *gui_templates_get_sessions_notebook(){
   uint32_t i;
   D_Session *session;
 
-  GtkWidget *notebook = NULL;
+  GtkWidget *notebook = gtk_notebook_new();
 
   GtkWidget *session_vbox;
   GtkWidget *session_namelabel;
@@ -844,16 +855,11 @@ GtkWidget *gui_templates_get_sessions_notebook(){
     gui_templates_pack_box_with_session(session, session_vbox);
     dharma_session_set_gtk_box(session, session_vbox);
 
-    if (nsessions == 1){
-      return session_vbox;
-    }
-
-    if (notebook == NULL){
-      notebook = gtk_notebook_new();
-    }
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), session_vbox, session_namelabel);
   }
 
+  _notebook = notebook;
+  g_signal_connect(notebook, "switch-page", G_CALLBACK(gui_templates_notebook_switch_page_handler), (gpointer) notebook);
   return notebook;
 }
 
@@ -887,7 +893,6 @@ D_Session *gui_templates_open_file(GtkWidget *w, gpointer data){
     draw_main_window(window_root, NULL);
   }
 
-  return ret;
   #elif defined(_WIN32) || defined (WIN32)
   char filename[MAX_PATH];
   D_Session *ret = NULL;
@@ -913,8 +918,11 @@ D_Session *gui_templates_open_file(GtkWidget *w, gpointer data){
   ret = file_io_open_file(filename);
   draw_main_window(window_root, NULL);
 
-  return ret;
   #endif
+
+  gtk_notebook_set_current_page(GTK_NOTEBOOK(_notebook), dharma_session_get_nsessions() -1);
+  gui_templates_update_layers_window(ret);
+  return ret;
 }
 
 /******************
@@ -939,10 +947,10 @@ void gui_templates_destroy(GtkWidget *w, gpointer data){
   gtk_widget_destroy(window);
 }
 
-void gui_templates_update_layers_window(GtkWidget *window, D_Session *s){
-  gui_templates_clear_container(window);
+void gui_templates_update_layers_window(D_Session *s){
+  gui_templates_clear_container(_window_layers);
   GtkWidget *b = gui_templates_get_layers_window_box(s);
-  gtk_container_add(GTK_CONTAINER(window), b);
+  gtk_container_add(GTK_CONTAINER(_window_layers), b);
   gtk_widget_show_all(b);
 }
 
@@ -951,11 +959,19 @@ void gui_templates_update_session_and_redraw(D_Session *s){
   on_window_draw(dharma_session_get_gtk_da(s), NULL, (gpointer) s);
 }
 
+void gui_templates_set_window_layers(GtkWidget *w){
+  _window_layers = w;
+}
+
 /**********
  *
  * HANDLERS
  *
  **********/
+
+void gui_templates_notebook_switch_page_handler(GtkWidget *notebook, GtkWidget *page, uint32_t pagenum, gpointer data){
+  gui_templates_update_layers_window(dharma_session_get_session_from_id(pagenum));
+}
 
 void gui_templates_select_layer_handler(GtkWidget *w, gpointer d){
   D_Session *s = (D_Session *) d;
@@ -965,10 +981,10 @@ void gui_templates_select_layer_handler(GtkWidget *w, gpointer d){
 
   dharma_session_set_selected_layer(s, index);
 
-  GtkWidget *window_layers = gtk_widget_get_toplevel(w);
-  gui_templates_update_layers_window(window_layers, s);
+  gui_templates_update_layers_window(s);
 }
 void gui_templates_move_layer_up_button_handler(GtkWidget *w, gpointer d){
+  (void) w;
   D_Session *s = (D_Session *) d;
   if (s == NULL) { return; }
 
@@ -986,10 +1002,10 @@ void gui_templates_move_layer_up_button_handler(GtkWidget *w, gpointer d){
 
   gui_templates_update_session_and_redraw(s);
 
-  GtkWidget *window_layers = gtk_widget_get_toplevel(w);
-  gui_templates_update_layers_window(window_layers, s);
+  gui_templates_update_layers_window(s);
 }
 void gui_templates_move_layer_down_button_handler(GtkWidget *w, gpointer d){
+  (void) w;
   D_Session *s = (D_Session *) d;
   if (s == NULL) { return; }
 
@@ -1006,10 +1022,10 @@ void gui_templates_move_layer_down_button_handler(GtkWidget *w, gpointer d){
 
   gui_templates_update_session_and_redraw(s);
 
-  GtkWidget *window_layers = gtk_widget_get_toplevel(w);
-  gui_templates_update_layers_window(window_layers, s);
+  gui_templates_update_layers_window(s);
 }
 void gui_templates_remove_layer_button_handler(GtkWidget *w, gpointer d){
+  (void) w;
   D_Session *s = (D_Session *) d;
   if (s == NULL) { return; }
   int32_t index = dharma_session_get_selected_layer_index(s);
@@ -1019,10 +1035,10 @@ void gui_templates_remove_layer_button_handler(GtkWidget *w, gpointer d){
 
   gui_templates_update_session_and_redraw(s);
 
-  GtkWidget *window_layers = gtk_widget_get_toplevel(w);
-  gui_templates_update_layers_window(window_layers, s);
+  gui_templates_update_layers_window(s);
 }
 void gui_templates_new_layer_button_handler(GtkWidget *w, gpointer d){
+  (void) w;
   D_Session *s = (D_Session *) d;
   if (s == NULL) { return; }
   if (dharma_session_add_layer(s)){
@@ -1031,8 +1047,7 @@ void gui_templates_new_layer_button_handler(GtkWidget *w, gpointer d){
 
   gui_templates_update_session_and_redraw(s);
 
-  GtkWidget *window_layers = gtk_widget_get_toplevel(w);
-  gui_templates_update_layers_window(window_layers, s);
+  gui_templates_update_layers_window(s);
 }
 void gui_templates_canvas_horizontal_adjustment_value_changed_handler(GtkAdjustment *adj, gpointer d){
   D_Session *s = (D_Session *) d;

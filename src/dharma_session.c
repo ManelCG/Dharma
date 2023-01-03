@@ -108,6 +108,7 @@ D_Session *dharma_session_new_private(uint32_t w, uint32_t h, uint32_t bpp){
     sessions = realloc(sessions, sizeof(D_Session *) * (nsessions + 1));
   }
   sessions[nsessions] = s;
+  selected_session = nsessions;
   nsessions++;
 
   return s;
@@ -316,6 +317,9 @@ uint32_t dharma_session_get_bpp(D_Session *s){
 }
 uint32_t dharma_session_get_Bpp(D_Session *s){
   return s->bpp/8;
+}
+uint32_t dharma_session_get_selected_session_index(){
+  return selected_session;
 }
 D_Session *dharma_session_get_selected_session(){
   return sessions[selected_session];

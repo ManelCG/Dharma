@@ -70,7 +70,7 @@ int main(int argc, char *argv[]){
   // dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
   // dharma_session_set_filename(s, "438x793");
 
-  dharma_sessions_destroy_all();
+  // dharma_sessions_destroy_all();
 
   dharma_sessions_print_all();
 
@@ -92,6 +92,7 @@ int main(int argc, char *argv[]){
   gtk_container_set_border_width(GTK_CONTAINER(window_layers), 5);
   gtk_window_set_default_size(GTK_WINDOW(window_layers), 280, 300);
   gtk_container_add(GTK_CONTAINER(window_layers), gui_templates_get_layers_window_box(dharma_session_get_session_from_id(0)));
+  gui_templates_set_window_layers(window_layers);
   gtk_widget_show_all(window_layers);
 
   gtk_main();
