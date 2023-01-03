@@ -534,6 +534,27 @@ bool dharma_session_remove_layer(D_Session *s, uint32_t index){
   return true;
 }
 
+bool dharma_session_slide_layer(D_Session *s, uint32_t src, uint32_t dest){
+  if (src < dest){
+    uint32_t i;
+
+    for (i = src; i < dest; i++){
+      dharma_session_swap_layers(s, i, i+1);
+    }
+    return true;
+  }
+
+  if (src > dest){
+    uint32_t i;
+
+    for (i = src; i > dest; i--){
+      dharma_session_swap_layers(s, i, i-1);
+    }
+    return true;
+  }
+
+  return false;
+}
 bool dharma_session_swap_layers(D_Session *s, uint32_t a, uint32_t b){
   if (a >= s->nlayers || b >= s->nlayers){
     return false;

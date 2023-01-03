@@ -965,10 +965,15 @@ void gui_templates_move_layer_up_button_handler(GtkWidget *w, gpointer d){
   D_Session *s = (D_Session *) d;
 
   uint32_t layer = dharma_session_get_selected_layer_index(s);
-  if (layer != dharma_session_get_nlayers(s)){
-    if (dharma_session_swap_layers(s, layer, layer+1) == true){
-      dharma_session_set_selected_layer(s, layer+1);
-    }
+  uint32_t dest;
+  if (layer != dharma_session_get_nlayers(s) - 1){
+    dest = layer + 1;
+  } else {
+    dest = 0;
+  }
+
+  if (dharma_session_slide_layer(s, layer, dest) == true){
+    dharma_session_set_selected_layer(s, dest);
   }
 
   gui_templates_update_session_and_redraw(s);
@@ -980,10 +985,14 @@ void gui_templates_move_layer_down_button_handler(GtkWidget *w, gpointer d){
   D_Session *s = (D_Session *) d;
 
   uint32_t layer = dharma_session_get_selected_layer_index(s);
+  uint32_t dest;
   if (layer != 0){
-    if (dharma_session_swap_layers(s, layer, layer-1) == true){
-      dharma_session_set_selected_layer(s, layer-1);
-    }
+    dest = layer-1;
+  } else {
+    dest = dharma_session_get_nlayers(s) -1;
+  }
+  if (dharma_session_slide_layer(s, layer, dest) == true){
+    dharma_session_set_selected_layer(s, dest);
   }
 
   gui_templates_update_session_and_redraw(s);

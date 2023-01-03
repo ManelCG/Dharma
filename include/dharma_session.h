@@ -104,6 +104,7 @@ bool dharma_session_add_layer(D_Session *s);
 bool dharma_session_remove_layer(D_Session *s, uint32_t index);
 
 bool dharma_session_swap_layers(D_Session *s, uint32_t a, uint32_t b);
+bool dharma_session_slide_layer(D_Session *s, uint32_t src, uint32_t dest);
 
 //Session image operations
 bool dharma_session_rotate_clockwise(D_Session *s);
