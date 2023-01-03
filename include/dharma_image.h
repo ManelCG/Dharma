@@ -53,6 +53,9 @@ bool dharma_image_set_pixel_from_uint64(D_Image *im, uint32_t x, uint32_t y, uin
 bool dharma_image_set_pixel_from_1Barray(D_Image *im, uint32_t x, uint32_t y, const uint8_t *array);
 bool dharma_image_set_pixel_from_2Barray(D_Image *im, uint32_t x, uint32_t y, const uint16_t *array);
 
+void *dharma_image_get_owner_session(D_Image *im);
+void dharma_image_set_owner_session(D_Image *im, void *s);
+
 //Image operations
 bool dharma_image_fill_canvas(D_Image *im, uint64_t color);
 

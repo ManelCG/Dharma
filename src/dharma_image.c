@@ -24,6 +24,7 @@
 #include <dharma_image.h>
 #include <dharma_color.h>
 #include <dharma_math.h>
+#include <dharma_session.h>
 
 /*********************
  *
@@ -37,6 +38,7 @@ typedef struct D_Image {
   uint32_t bpp;
 
   char *name;
+  D_Session *owner_session;
 
   uint8_t *data;
 } D_Image;
@@ -314,6 +316,13 @@ bool dharma_image_flip_vertically(D_Image *im){
   im->data = data;
 
   return true;
+}
+
+void *dharma_image_get_owner_session(D_Image *im){
+  return im->owner_session;
+}
+void dharma_image_set_owner_session(D_Image *im, void *s){
+  im->owner_session = s;
 }
 
 //Helpers

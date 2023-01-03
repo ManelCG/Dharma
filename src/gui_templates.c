@@ -948,6 +948,10 @@ void gui_templates_destroy(GtkWidget *w, gpointer data){
 }
 
 void gui_templates_update_layers_window(D_Session *s){
+  if (_window_layers == NULL){
+    return;
+  }
+
   gui_templates_clear_container(_window_layers);
   GtkWidget *b = gui_templates_get_layers_window_box(s);
   gtk_container_add(GTK_CONTAINER(_window_layers), b);
@@ -970,7 +974,12 @@ void gui_templates_set_window_layers(GtkWidget *w){
  **********/
 
 void gui_templates_notebook_switch_page_handler(GtkWidget *notebook, GtkWidget *page, uint32_t pagenum, gpointer data){
-  gui_templates_update_layers_window(dharma_session_get_session_from_id(pagenum));
+  (void) notebook; (void) page; (void) data;
+  D_Session *s = dharma_session_get_session_from_id(pagenum);
+
+  if (s != NULL){
+    gui_templates_update_layers_window(s);
+  }
 }
 
 void gui_templates_select_layer_handler(GtkWidget *w, gpointer d){
@@ -1081,83 +1090,105 @@ void gui_templates_canvas_vertical_adjustment_value_changed_handler(GtkAdjustmen
 }
 void gui_templates_flip_image_horizontally_handler(GtkWidget *w, gpointer d){
   D_Session *s = dharma_session_get_selected_session();
-  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
-  (void) w;
+  (void) w; (void) d;
   if (dharma_session_flip_horizontally(s)){
-    draw_main_window(window_root, NULL);
+    on_window_draw(dharma_session_get_gtk_da(s), NULL, (gpointer) s);
+    gui_templates_update_layers_window(s);
   }
 }
 void gui_templates_flip_image_vertically_handler(GtkWidget *w, gpointer d){
   D_Session *s = dharma_session_get_selected_session();
-  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
-  (void) w;
+  (void) w; (void) d;
   if (dharma_session_flip_vertically(s)){
-    draw_main_window(window_root, NULL);
+    on_window_draw(dharma_session_get_gtk_da(s), NULL, (gpointer) s);
+    gui_templates_update_layers_window(s);
   }
 }
 void gui_templates_flip_layer_horizontally_handler(GtkWidget *w, gpointer d){
   D_Image *im = dharma_session_get_selected_layer(dharma_session_get_selected_session());
-  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
-  (void) w;
+  D_Session *s = dharma_image_get_owner_session(im);
+  (void) w; (void) d;
   if (dharma_image_flip_horizontally(im)){
-    draw_main_window(window_root, NULL);
+    dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
+    on_window_draw(dharma_session_get_gtk_da(s), NULL, (gpointer) s);
+    gui_templates_update_layers_window(s);
   }
 }
 void gui_templates_flip_layer_vertically_handler(GtkWidget *w, gpointer d){
   D_Image *im = dharma_session_get_selected_layer(dharma_session_get_selected_session());
-  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
-  (void) w;
+  D_Session *s = dharma_image_get_owner_session(im);
+  (void) w; (void) d;
   if (dharma_image_flip_vertically(im)){
-    draw_main_window(window_root, NULL);
+    dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
+    on_window_draw(dharma_session_get_gtk_da(s), NULL, (gpointer) s);
+    gui_templates_update_layers_window(s);
   }
 }
 
 void gui_templates_rotate_image_clockwise_handler(GtkWidget *w, gpointer d){
   D_Session *s = dharma_session_get_selected_session();
-  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
-  (void) w;
+  (void) w; (void) d;
   if (dharma_session_rotate_clockwise(s)){
-    draw_main_window(window_root, NULL);
+    on_window_draw(dharma_session_get_gtk_da(s), NULL, (gpointer) s);
+    gui_templates_update_layers_window(s);
   }
 }
 void gui_templates_rotate_image_anticlockwise_handler(GtkWidget *w, gpointer d){
   D_Session *s = dharma_session_get_selected_session();
-  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
-  (void) w;
+  (void) w; (void) d;
   if (dharma_session_rotate_anticlockwise(s)){
-    draw_main_window(window_root, NULL);
+    on_window_draw(dharma_session_get_gtk_da(s), NULL, (gpointer) s);
+    gui_templates_update_layers_window(s);
   }
 }
 void gui_templates_rotate_image_180_handler(GtkWidget *w, gpointer d){
   D_Session *s = dharma_session_get_selected_session();
-  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
-  (void) w;
+  (void) w; (void) d;
   if (dharma_session_rotate_180(s)){
-    draw_main_window(window_root, NULL);
+    on_window_draw(dharma_session_get_gtk_da(s), NULL, (gpointer) s);
+    gui_templates_update_layers_window(s);
   }
 }
 void gui_templates_rotate_layer_clockwise_handler(GtkWidget *w, gpointer d){
   D_Image *im = dharma_session_get_selected_layer(dharma_session_get_selected_session());
-  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
-  (void) w;
+  D_Session *s = dharma_image_get_owner_session(im);
+
+  if (dharma_session_get_width(s) != dharma_image_get_height(im) ||
+      dharma_session_get_height(s) != dharma_image_get_width(im)){
+    return;
+  }
+
+  (void) w; (void) d;
   if (dharma_image_rotate_clockwise(im)){
-    draw_main_window(window_root, NULL);
+    dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
+    on_window_draw(dharma_session_get_gtk_da(s), NULL, (gpointer) s);
+    gui_templates_update_layers_window(s);
   }
 }
 void gui_templates_rotate_layer_anticlockwise_handler(GtkWidget *w, gpointer d){
   D_Image *im = dharma_session_get_selected_layer(dharma_session_get_selected_session());
-  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
-  (void) w;
+  D_Session *s = dharma_image_get_owner_session(im);
+
+  if (dharma_session_get_width(s) != dharma_image_get_height(im) ||
+      dharma_session_get_height(s) != dharma_image_get_width(im)){
+    return;
+  }
+
+  (void) w; (void) d;
   if (dharma_image_rotate_anticlockwise(im)){
-    draw_main_window(window_root, NULL);
+    dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
+    on_window_draw(dharma_session_get_gtk_da(s), NULL, (gpointer) s);
+    gui_templates_update_layers_window(s);
   }
 }
 void gui_templates_rotate_layer_180_handler(GtkWidget *w, gpointer d){
   D_Image *im = dharma_session_get_selected_layer(dharma_session_get_selected_session());
-  GtkWidget *window_root = gtk_widget_get_toplevel((GtkWidget *) d);
-  (void) w;
+  D_Session *s = dharma_image_get_owner_session(im);
+  (void) w; (void) d;
   if (dharma_image_rotate_180(im)){
-    draw_main_window(window_root, NULL);
+    dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
+    on_window_draw(dharma_session_get_gtk_da(s), NULL, (gpointer) s);
+    gui_templates_update_layers_window(s);
   }
 }
 

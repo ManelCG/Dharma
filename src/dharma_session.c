@@ -123,6 +123,7 @@ D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp){
   s->selected_layer = 0;
 
   dharma_image_set_default_name(im, s->nlayers);
+  dharma_image_set_owner_session(im, s);
 
   D_Image *layer_sum = dharma_image_new_empty(w, h, bpp);
   s->layer_sum = malloc(sizeof(D_Image *));
@@ -142,6 +143,7 @@ D_Session *dharma_session_new_from_data(uint8_t *data, uint32_t w, uint32_t h, u
   s->selected_layer = 0;
 
   dharma_image_set_default_name(im, s->nlayers);
+  dharma_image_set_owner_session(im, s);
 
   D_Image *layer_sum = dharma_image_new_empty(w, h, bpp);
   s->layer_sum = malloc(sizeof(D_Image *));
@@ -484,6 +486,7 @@ bool dharma_session_add_layer_from_image(D_Session *s, D_Image *im){
   }
 
   dharma_image_set_default_name(im, s->nlayers);
+  dharma_image_set_owner_session(im, s);
 
   s->layers[s->nlayers-1] = im;
 
@@ -494,6 +497,7 @@ bool dharma_session_add_layer(D_Session *s){
   D_Image *im = dharma_image_new_empty(s->w, s->h, s->bpp);
 
   dharma_image_set_default_name(im, s->nlayers + 1);
+  dharma_image_set_owner_session(im, s);
 
   return dharma_session_add_layer_from_image(s, im);
 }
@@ -652,7 +656,6 @@ bool dharma_session_update_layer_sum(D_Session *s, uint32_t x, uint32_t y, uint3
 bool dharma_session_rotate_clockwise(D_Session *s){
   uint32_t aux;
   for (uint32_t i = 0; i < s->nlayers; i++){
-    printf("Rotating layer\n");
     if (!dharma_image_rotate_clockwise(s->layers[i])){
       return false;
     }

@@ -37,6 +37,11 @@ int main(int argc, char *argv[]){
   D_Session *s;
   D_Image *im, *firstlayer;
 
+  s = dharma_session_new(1920, 1080, 32);
+  dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
+  dharma_session_set_filename(s, "1920x1080");
+
+
   s = dharma_session_new(200, 500, 32);
   firstlayer = dharma_session_get_layer(s, 0);
   dharma_image_fill_canvas(firstlayer, 0xFF000080);
@@ -45,10 +50,6 @@ int main(int argc, char *argv[]){
   dharma_session_add_layer_from_image(s, im);
   dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
   dharma_session_set_filename(s, "Red.png");
-
-  s = dharma_session_new(1920, 1080, 32);
-  dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
-  dharma_session_set_filename(s, "1920x1080");
 
   // s = dharma_session_new(1280, 720, 24);
   // dharma_session_set_filename(s, "1280x720");
