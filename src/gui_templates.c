@@ -250,9 +250,9 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
     menu_button_open_file = gtk_image_menu_item_new_with_label("Open file");
     g_signal_connect(menu_button_open_file, "activate", G_CALLBACK(gui_templates_open_file), (gpointer) menu_menubar);
     #ifdef __unix__
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("document-open-symbolic", 16);
     #elif defined(_WIN32) || defined (WIN32)
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("document-open-symbolic", 16);
     #endif
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_open_file), icon);
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(menu_button_open_file), true);
@@ -261,9 +261,9 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
     menu_button_new_file = gtk_image_menu_item_new_with_label("New file");
     g_signal_connect(menu_button_new_file, "activate", G_CALLBACK(gui_templates_new_file_window), (gpointer) menu_menubar);
     #ifdef __unix__
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("list-add-symbolic", 16);
     #elif defined(_WIN32) || defined (WIN32)
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("list-add-symbolic", 16);
     #endif
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menu_button_new_file), icon);
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(menu_button_new_file), true);
@@ -287,9 +287,9 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
     GtkWidget *button = menu_button_flip_image_horizontally = gtk_image_menu_item_new_with_label("Flip image horizontally");
     g_signal_connect(button, "activate", G_CALLBACK(gui_templates_flip_image_horizontally_handler), (gpointer) menu_menubar);
     #ifdef __unix__
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-flip-horizontal-symbolic", 16);
     #elif defined(_WIN32) || defined (WIN32)
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-flip-horizontal-symbolic", 16);
     #endif
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
@@ -298,9 +298,9 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
     GtkWidget *button = menu_button_flip_image_vertically = gtk_image_menu_item_new_with_label("Flip image vertically");
     g_signal_connect(button, "activate", G_CALLBACK(gui_templates_flip_image_vertically_handler), (gpointer) menu_menubar);
     #ifdef __unix__
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-flip-vertical-symbolic", 16);
     #elif defined(_WIN32) || defined (WIN32)
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-flip-vertical-symbolic", 16);
     #endif
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
@@ -309,9 +309,9 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
     GtkWidget *button = menu_button_flip_layer_horizontally = gtk_image_menu_item_new_with_label("Flip layer horizontally");
     g_signal_connect(button, "activate", G_CALLBACK(gui_templates_flip_layer_horizontally_handler), (gpointer) menu_menubar);
     #ifdef __unix__
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-flip-horizontal-symbolic", 16);
     #elif defined(_WIN32) || defined (WIN32)
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-flip-horizontal-symbolic", 16);
     #endif
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
@@ -320,9 +320,9 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
     GtkWidget *button = menu_button_flip_layer_vertically = gtk_image_menu_item_new_with_label("Flip layer vertically");
     g_signal_connect(button, "activate", G_CALLBACK(gui_templates_flip_layer_horizontally_handler), (gpointer) menu_menubar);
     #ifdef __unix__
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-flip-vertical-symbolic", 16);
     #elif defined(_WIN32) || defined (WIN32)
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-flip-vertical-symbolic", 16);
     #endif
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
@@ -333,9 +333,9 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
     GtkWidget *button = menu_button_rotate_image_clockwise = gtk_image_menu_item_new_with_label("Rotate 90º Clockwise");
     g_signal_connect(button, "activate", G_CALLBACK(gui_templates_rotate_image_clockwise_handler ), (gpointer) menu_menubar);
     #ifdef __unix__
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-rotate-right-symbolic", 16);
     #elif defined(_WIN32) || defined (WIN32)
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-rotate-right-symbolic", 16);
     #endif
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
@@ -344,9 +344,9 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
     GtkWidget *button = menu_button_rotate_image_anticlockwise = gtk_image_menu_item_new_with_label("Rotate 90º Anti-clockwise");
     g_signal_connect(button, "activate", G_CALLBACK(gui_templates_rotate_image_anticlockwise_handler ), (gpointer) menu_menubar);
     #ifdef __unix__
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-rotate-left-symbolic", 16);
     #elif defined(_WIN32) || defined (WIN32)
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-rotate-left-symbolic", 16);
     #endif
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
@@ -355,9 +355,9 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
     GtkWidget *button = menu_button_rotate_image_180 = gtk_image_menu_item_new_with_label("Rotate 180º");
     g_signal_connect(button, "activate", G_CALLBACK(gui_templates_rotate_image_180_handler ), (gpointer) menu_menubar);
     #ifdef __unix__
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh-symbolic", 16);
     #elif defined(_WIN32) || defined (WIN32)
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh-symbolic", 16);
     #endif
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
@@ -366,9 +366,9 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
     GtkWidget *button = menu_button_rotate_layer_clockwise = gtk_image_menu_item_new_with_label("Rotate 90º Clockwise");
     g_signal_connect(button, "activate", G_CALLBACK(gui_templates_rotate_layer_clockwise_handler ), (gpointer) menu_menubar);
     #ifdef __unix__
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-rotate-right-symbolic", 16);
     #elif defined(_WIN32) || defined (WIN32)
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-rotate-right-symbolic", 16);
     #endif
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
@@ -377,9 +377,9 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
     GtkWidget *button = menu_button_rotate_layer_anticlockwise = gtk_image_menu_item_new_with_label("Rotate 90º Anti-clockwise");
     g_signal_connect(button, "activate", G_CALLBACK(gui_templates_rotate_layer_anticlockwise_handler ), (gpointer) menu_menubar);
     #ifdef __unix__
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-rotate-left-symbolic", 16);
     #elif defined(_WIN32) || defined (WIN32)
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("object-rotate-left-symbolic", 16);
     #endif
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
@@ -388,17 +388,19 @@ GtkWidget *gui_templates_get_mainscreen_menubar(){
     GtkWidget *button = menu_button_rotate_layer_180 = gtk_image_menu_item_new_with_label("Rotate 180º");
     g_signal_connect(button, "activate", G_CALLBACK(gui_templates_rotate_layer_180_handler ), (gpointer) menu_menubar);
     #ifdef __unix__
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh-symbolic", 16);
     #elif defined(_WIN32) || defined (WIN32)
-    GtkWidget *icon = gtk_image_new_from_icon_name("dialog-information-symbolic", 16);
+    GtkWidget *icon = gtk_image_new_from_icon_name("view-refresh-symbolic", 16);
     #endif
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(button), icon);
     gtk_image_menu_item_set_always_show_image(GTK_IMAGE_MENU_ITEM(button), true);
   }
 
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_flip_imageMi);
-  gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_flip_layerMi);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_rotate_layerMi);
+  {GtkWidget *separator = gtk_separator_menu_item_new();
+     gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), separator);}
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_flip_layerMi);
   gtk_menu_shell_append(GTK_MENU_SHELL(menu_editmenu), menu_rotate_imageMi);
 
   menu_flip_image_submenu = gtk_menu_new();
