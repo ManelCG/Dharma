@@ -120,7 +120,13 @@ GtkWidget *gui_templates_get_layers_window_box(D_Session *s){
   GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 
   GtkWidget *top_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-  GtkWidget *imagename_label = gtk_label_new(dharma_session_get_filename(s));
+  GtkWidget *imagename_label;
+
+  if (s != NULL){
+    imagename_label = gtk_label_new(dharma_session_get_filename(s));
+  } else {
+    imagename_label = gtk_label_new("No files open");
+  }
 
   GtkWidget *scroll_window = gtk_scrolled_window_new(NULL, NULL);
   GtkWidget *vbox_scroll = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
@@ -953,6 +959,7 @@ void gui_templates_update_session_and_redraw(D_Session *s){
 
 void gui_templates_select_layer_handler(GtkWidget *w, gpointer d){
   D_Session *s = (D_Session *) d;
+  if (s == NULL) { return; }
   const char *widname = gtk_widget_get_name(w);
   uint32_t index = atoi(widname);
 
@@ -963,6 +970,7 @@ void gui_templates_select_layer_handler(GtkWidget *w, gpointer d){
 }
 void gui_templates_move_layer_up_button_handler(GtkWidget *w, gpointer d){
   D_Session *s = (D_Session *) d;
+  if (s == NULL) { return; }
 
   uint32_t layer = dharma_session_get_selected_layer_index(s);
   uint32_t dest;
@@ -983,6 +991,7 @@ void gui_templates_move_layer_up_button_handler(GtkWidget *w, gpointer d){
 }
 void gui_templates_move_layer_down_button_handler(GtkWidget *w, gpointer d){
   D_Session *s = (D_Session *) d;
+  if (s == NULL) { return; }
 
   uint32_t layer = dharma_session_get_selected_layer_index(s);
   uint32_t dest;
@@ -1002,6 +1011,7 @@ void gui_templates_move_layer_down_button_handler(GtkWidget *w, gpointer d){
 }
 void gui_templates_remove_layer_button_handler(GtkWidget *w, gpointer d){
   D_Session *s = (D_Session *) d;
+  if (s == NULL) { return; }
   int32_t index = dharma_session_get_selected_layer_index(s);
   if (dharma_session_remove_layer(s, index)){
     dharma_session_set_selected_layer(s, MAX(index -1, 0));
@@ -1014,6 +1024,7 @@ void gui_templates_remove_layer_button_handler(GtkWidget *w, gpointer d){
 }
 void gui_templates_new_layer_button_handler(GtkWidget *w, gpointer d){
   D_Session *s = (D_Session *) d;
+  if (s == NULL) { return; }
   if (dharma_session_add_layer(s)){
     dharma_session_set_selected_layer(s, dharma_session_get_nlayers(s)-1);
   }

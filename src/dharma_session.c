@@ -648,14 +648,21 @@ bool dharma_session_update_layer_sum(D_Session *s, uint32_t x, uint32_t y, uint3
 bool dharma_session_rotate_clockwise(D_Session *s){
   uint32_t aux;
   for (uint32_t i = 0; i < s->nlayers; i++){
+    printf("Rotating layer\n");
     if (!dharma_image_rotate_clockwise(s->layers[i])){
       return false;
     }
   }
 
+  dharma_image_rotate_clockwise(s->layer_sum);
+
   aux = s->centerx;
   s->centerx = s->centery;
   s->centery = aux;
+
+  aux = s->w;
+  s->w= s->h;
+  s->h= aux;
 
   return true;
 }
@@ -667,9 +674,15 @@ bool dharma_session_rotate_anticlockwise(D_Session *s){
     }
   }
 
+  dharma_image_rotate_anticlockwise(s->layer_sum);
+
   aux = s->centerx;
   s->centerx = s->centery;
   s->centery = aux;
+
+  aux = s->w;
+  s->w= s->h;
+  s->h= aux;
 
   return true;
 }
@@ -679,6 +692,8 @@ bool dharma_session_rotate_180(D_Session *s){
       return false;
     }
   }
+
+  dharma_image_rotate_180(s->layer_sum);
 
   return true;
 }
@@ -690,6 +705,8 @@ bool dharma_session_flip_horizontally(D_Session *s){
     }
   }
 
+  dharma_image_flip_horizontally(s->layer_sum);
+
   return true;
 }
 bool dharma_session_flip_vertically(D_Session *s){
@@ -698,6 +715,8 @@ bool dharma_session_flip_vertically(D_Session *s){
       return false;
     }
   }
+
+  dharma_image_flip_vertically(s->layer_sum);
 
   return true;
 }
