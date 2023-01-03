@@ -37,9 +37,9 @@ int main(int argc, char *argv[]){
   D_Session *s;
   D_Image *im, *firstlayer;
 
-  s = dharma_session_new(1920, 1080, 32);
-  dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
-  dharma_session_set_filename(s, "1920x1080");
+  // s = dharma_session_new(1920, 1080, 32);
+  // dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
+  // dharma_session_set_filename(s, "1920x1080");
 
 
   s = dharma_session_new(200, 500, 32);
@@ -51,9 +51,9 @@ int main(int argc, char *argv[]){
   dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
   dharma_session_set_filename(s, "Red.png");
 
-  // s = dharma_session_new(1280, 720, 24);
-  // dharma_session_set_filename(s, "1280x720");
-  // dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
+  s = dharma_session_new(1280, 720, 24);
+  dharma_session_set_filename(s, "1280x720");
+  dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
 
   // s = dharma_session_new(500, 500, 24);
   // im = dharma_session_get_layer(s, 0);
@@ -85,16 +85,7 @@ int main(int argc, char *argv[]){
   draw_main_window(window_root, NULL);
   gtk_widget_show_all(window_root);
 
-  GtkWidget *window_layers = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title(GTK_WINDOW(window_layers), DHARMA_LAYERS_WINDOW_NAME);
-  gtk_widget_set_name(window_layers, DHARMA_LAYERS_WINDOW_WIDGET_NAME);
-  g_signal_connect(window_layers, "destroy", G_CALLBACK(gui_templates_destroy), (gpointer) window_layers);
-  gtk_window_set_position(GTK_WINDOW(window_layers), GTK_WIN_POS_CENTER);
-  gtk_container_set_border_width(GTK_CONTAINER(window_layers), 5);
-  gtk_window_set_default_size(GTK_WINDOW(window_layers), 280, 300);
-  gtk_container_add(GTK_CONTAINER(window_layers), gui_templates_get_layers_window_box(dharma_session_get_session_from_id(0)));
-  gui_templates_set_window_layers(window_layers);
-  gtk_widget_show_all(window_layers);
+  gui_templates_spawn_layers_window();
 
   gtk_main();
   return 0;

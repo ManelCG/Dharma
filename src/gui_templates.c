@@ -40,8 +40,31 @@
  *
  *****************/
 
+GtkWidget *_window_layers_visible_toggle = NULL;
+bool window_layers_visible = true;
+
 GtkWidget *_window_layers = NULL;
 GtkWidget *_notebook = NULL;
+
+/**********
+ *
+ * SPAWNERS
+ *
+ *********/
+
+void gui_templates_spawn_layers_window(){
+  GtkWidget *window_layers = gtk_dialog_new();
+  gui_templates_clear_container(window_layers);
+  gtk_window_set_title(GTK_WINDOW(window_layers), DHARMA_LAYERS_WINDOW_NAME);
+  gtk_widget_set_name(window_layers, DHARMA_LAYERS_WINDOW_WIDGET_NAME);
+  g_signal_connect(window_layers, "destroy", G_CALLBACK(gui_templates_toggle_window_layers_visible), (gpointer) window_layers);
+  gtk_window_set_position(GTK_WINDOW(window_layers), GTK_WIN_POS_CENTER);
+  gtk_container_set_border_width(GTK_CONTAINER(window_layers), 5);
+  gtk_window_set_default_size(GTK_WINDOW(window_layers), 280, 300);
+  gtk_container_add(GTK_CONTAINER(window_layers), gui_templates_get_layers_window_box(dharma_session_get_selected_session()));
+  gui_templates_set_window_layers(window_layers);
+  gtk_widget_show_all(window_layers);
+}
 
 /*******************
  *
@@ -64,6 +87,7 @@ void draw_main_window(GtkWidget *window, gpointer data){
   menu_menubar = gui_templates_get_mainscreen_menubar();
   gtk_box_pack_start(GTK_BOX(main_vbox), menu_menubar, false, false, 0);
 
+  gtk_box_pack_start(GTK_BOX(main_vbox), gui_templates_get_window_toggling_toolbar(), false, false, 0);
   gtk_box_pack_start(GTK_BOX(main_vbox), notebook_sessions, true, true, 0);
 
   gtk_container_add(GTK_CONTAINER(window), main_vbox);
@@ -77,15 +101,23 @@ void draw_main_window(GtkWidget *window, gpointer data){
  *
  ***************************/
 
-GtkWidget *gui_templates_get_layer_window_list_element(D_Session *s, uint32_t index){
-  D_Image *im = dharma_session_get_layer(s, index);
+GtkWidget *gui_templates_get_window_toggling_toolbar(){
+  GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 
-  uint32_t max_width = 80;
-  uint32_t max_height = 60;
+  GtkWidget *toggle_layers_button = gtk_toggle_button_new();
+  { GtkWidget *icon = gtk_image_new_from_icon_name("image-x-generic", GTK_ICON_SIZE_MENU);
+    gtk_button_set_image(GTK_BUTTON(toggle_layers_button), icon); }
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle_layers_button), window_layers_visible);
+  _window_layers_visible_toggle = toggle_layers_button;
+  gtk_box_pack_start(GTK_BOX(hbox), toggle_layers_button, false, false, 0);
+  g_signal_connect(_window_layers_visible_toggle, "toggled", G_CALLBACK(gui_templates_toggle_window_layers_visible_button_handler), (gpointer) NULL);
+
+  return hbox;
+}
+
+GdkPixbuf *gui_templates_pixbuf_from_image_with_maxs_keep_aspect_ratio(D_Image *im, uint32_t max_width, uint32_t max_height){
   uint32_t width = dharma_image_get_width(im), height = dharma_image_get_height(im);
   float ratio = (float) width/ (float) height;
-  char layer_index_string[16];
-  snprintf(layer_index_string, 15, "%d", index);
 
   width = max_width;
   height = (float) width / (float) ratio;
@@ -95,13 +127,26 @@ GtkWidget *gui_templates_get_layer_window_list_element(D_Session *s, uint32_t in
     width = height * ratio;
   }
 
-  GtkWidget *button_general = gtk_button_new();
-
-  GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   GdkPixbuf *pixbuf = gui_templates_pixbuf_from_image(im);
 
   GdkPixbuf *pixbuf_scaled = gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
   g_object_unref(pixbuf);
+
+  return pixbuf_scaled;
+}
+
+GtkWidget *gui_templates_get_layer_window_list_element(D_Session *s, uint32_t index){
+  D_Image *im = dharma_session_get_layer(s, index);
+
+  uint32_t max_width = 80;
+  uint32_t max_height = 60;
+  char layer_index_string[16];
+  GdkPixbuf *pixbuf_scaled = gui_templates_pixbuf_from_image_with_maxs_keep_aspect_ratio(im, max_width, max_height);
+  snprintf(layer_index_string, 15, "%d", index);
+
+  GtkWidget *button_general = gtk_button_new();
+
+  GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 
   GtkWidget *check_selected_layer = gtk_check_button_new();
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_selected_layer), dharma_session_get_selected_layer_index(s) == index);
@@ -119,6 +164,10 @@ GtkWidget *gui_templates_get_layer_window_list_element(D_Session *s, uint32_t in
   gtk_widget_set_name(button_general, layer_index_string);
   g_signal_connect(button_general, "activate", G_CALLBACK(gui_templates_select_layer_handler), (gpointer) s);
   g_signal_connect(button_general, "pressed", G_CALLBACK(gui_templates_select_layer_handler), (gpointer) s);
+
+  if (!dharma_image_is_visible(im)){
+    gtk_widget_set_opacity(button_general, 0.5);
+  }
 
   return button_general;
 }
@@ -144,6 +193,7 @@ GtkWidget *gui_templates_get_layers_window_box(D_Session *s){
   GtkWidget *button_newlayer;
   GtkWidget *button_movelayer_up;
   GtkWidget *button_movelayer_down;
+  GtkWidget *button_toggle_layer_visibility;
   GtkWidget *button_removelayer;
 
   //Fill scrollbox
@@ -182,6 +232,13 @@ GtkWidget *gui_templates_get_layers_window_box(D_Session *s){
 
   {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
      gtk_box_pack_start(GTK_BOX(bot_hbox), separator, false, false, 0);}
+
+  button_toggle_layer_visibility = gtk_button_new();
+  g_signal_connect(button_toggle_layer_visibility, "activate", G_CALLBACK(gui_templates_toggle_layer_visibility_handler), (gpointer) s);
+  g_signal_connect(button_toggle_layer_visibility, "pressed", G_CALLBACK(gui_templates_toggle_layer_visibility_handler), (gpointer) s);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("gnumeric-row-unhide", GTK_ICON_SIZE_MENU);
+    gtk_button_set_image(GTK_BUTTON(button_toggle_layer_visibility), icon); }
+  gtk_box_pack_start(GTK_BOX(bot_hbox), button_toggle_layer_visibility, false, false, 0);
 
   button_removelayer = gtk_button_new();
   g_signal_connect(button_removelayer, "activate", G_CALLBACK(gui_templates_remove_layer_button_handler), (gpointer) s);
@@ -834,12 +891,23 @@ void gui_templates_pack_box_with_session(D_Session *session, GtkWidget *session_
 GtkWidget *gui_templates_get_sessions_notebook(){
   uint32_t nsessions;
   uint32_t i;
+  uint32_t thumb_max_width = 80, thumb_max_height = 60;
   D_Session *session;
 
   GtkWidget *notebook = gtk_notebook_new();
+  gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), true);
 
   GtkWidget *session_vbox;
+  GtkWidget *dummy_tab_vbox;
+
+  D_Image *im;
+
+  GtkWidget *tab_hbox;
+  GtkWidget *thumbnail;
+  GdkPixbuf *thumb_pixbuf;
   GtkWidget *session_namelabel;
+  GtkWidget *closebutton;
+  GtkWidget *page;
 
   nsessions = dharma_session_get_nsessions();
 
@@ -851,17 +919,50 @@ GtkWidget *gui_templates_get_sessions_notebook(){
   for (i = 0; i < nsessions; i++){
     session = dharma_session_get_session_from_id(i);
 
-    session_namelabel = gtk_label_new(dharma_session_get_filename(session));
     session_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 
     gui_templates_pack_box_with_session(session, session_vbox);
     dharma_session_set_gtk_box(session, session_vbox);
 
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), session_vbox, session_namelabel);
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), session_vbox, NULL);
+    page = gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook), i);
+
+    g_object_set_data(G_OBJECT(page), DHARMA_PAGE_LINKED_SESSION_DATA, session);
+
+    tab_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 15);
+    session_namelabel = gtk_label_new(dharma_session_get_filename(session));
+    closebutton = gtk_button_new();
+    { GtkWidget *icon = gtk_image_new_from_icon_name("window-close", GTK_ICON_SIZE_MENU);
+      gtk_button_set_image(GTK_BUTTON(closebutton), icon); }
+    gtk_widget_set_size_request(closebutton, 1, 1);
+    g_signal_connect(closebutton, "pressed", G_CALLBACK(gui_templates_close_session_handler), (gpointer) session);
+    g_signal_connect(closebutton, "activate", G_CALLBACK(gui_templates_close_session_handler), (gpointer) session);
+
+    im = dharma_session_get_layer_sum(session);
+    thumb_pixbuf = gui_templates_pixbuf_from_image_with_maxs_keep_aspect_ratio(im, thumb_max_width, thumb_max_height);
+    thumbnail = gtk_image_new_from_pixbuf(thumb_pixbuf);
+
+    gtk_box_pack_start(GTK_BOX(tab_hbox), thumbnail, false, false, 0);
+    gtk_box_pack_start(GTK_BOX(tab_hbox), session_namelabel, false, false, 0);
+
+    dummy_tab_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_pack_start(GTK_BOX(dummy_tab_vbox), closebutton, true, false, 0);
+    gtk_box_pack_start(GTK_BOX(tab_hbox), dummy_tab_vbox, false, false, 0);
+
+    gtk_widget_show_all(tab_hbox);
+
+    gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(notebook), page, true);
+    gtk_notebook_set_tab_label(GTK_NOTEBOOK(notebook), page, tab_hbox);
   }
+
+  gtk_widget_show_all(notebook);
+
+  gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), dharma_session_get_selected_session_index());
+  gtk_notebook_set_scrollable(GTK_NOTEBOOK(notebook), true);
 
   _notebook = notebook;
   g_signal_connect(notebook, "switch-page", G_CALLBACK(gui_templates_notebook_switch_page_handler), (gpointer) notebook);
+  g_signal_connect(notebook, "page-reordered", G_CALLBACK(gui_templates_notebook_page_reordered_handler), (gpointer) session);
   return notebook;
 }
 
@@ -950,6 +1051,7 @@ void gui_templates_destroy(GtkWidget *w, gpointer data){
 }
 
 void gui_templates_update_layers_window(D_Session *s){
+  if (!window_layers_visible) return;
   if (_window_layers == NULL){
     return;
   }
@@ -974,10 +1076,43 @@ void gui_templates_set_window_layers(GtkWidget *w){
  * HANDLERS
  *
  **********/
+void gui_templates_notebook_page_reordered_handler(GtkNotebook* self,GtkWidget* child, uint32_t page_num, gpointer data){
+  D_Session *s = g_object_get_data(G_OBJECT(child), DHARMA_PAGE_LINKED_SESSION_DATA);
+  uint32_t old_id = dharma_session_get_id(s);
+
+  dharma_session_slide_session(old_id, page_num);
+}
+
+void gui_templates_close_session_handler(GtkWidget *w, gpointer d){
+  (void) w;
+  D_Session *s = (D_Session *) d;
+  uint32_t ID = dharma_session_get_id(s);
+  gtk_notebook_remove_page(GTK_NOTEBOOK(_notebook), ID);
+  dharma_session_destroy(s);
+
+  if (gtk_notebook_get_n_pages(GTK_NOTEBOOK(_notebook)) == 0){
+    gui_templates_update_layers_window(NULL);
+  } else {
+    ID = gtk_notebook_get_current_page(GTK_NOTEBOOK(_notebook));
+    dharma_session_set_selected_session(ID);
+    gui_templates_update_layers_window(dharma_session_get_selected_session());
+  }
+}
+
+void gui_templates_toggle_layer_visibility_handler(GtkWidget *w, gpointer d){
+  D_Session *s = (D_Session *) d;
+  D_Image *im = dharma_session_get_selected_layer(s);
+
+  dharma_image_set_visible(im, !dharma_image_is_visible(im));
+
+  gui_templates_update_session_and_redraw(s);
+  gui_templates_update_layers_window(s);
+}
 
 void gui_templates_notebook_switch_page_handler(GtkWidget *notebook, GtkWidget *page, uint32_t pagenum, gpointer data){
   (void) notebook; (void) page; (void) data;
   D_Session *s = dharma_session_get_session_from_id(pagenum);
+  dharma_session_set_selected_session(dharma_session_get_id(s));
 
   if (s != NULL){
     gui_templates_update_layers_window(s);
@@ -1128,7 +1263,10 @@ void gui_templates_flip_layer_vertically_handler(GtkWidget *w, gpointer d){
 }
 
 void gui_templates_rotate_image_clockwise_handler(GtkWidget *w, gpointer d){
+  printf("Selected %d\n", dharma_session_get_selected_session_index());
+  printf("Selected b %d\n", dharma_session_get_id(dharma_session_get_selected_session()));
   D_Session *s = dharma_session_get_selected_session();
+  printf("Selected c %d\n", dharma_session_get_id(s));
   (void) w; (void) d;
   if (dharma_session_rotate_clockwise(s)){
     on_window_draw(dharma_session_get_gtk_da(s), NULL, (gpointer) s);
@@ -1227,4 +1365,21 @@ void canvas_mouse_handler(GtkWidget *event_box, GdkEventButton *event, gpointer 
   (void) s;
 
   // printf("%f, %f\n", event->x, event->y);
+}
+
+void gui_templates_toggle_window_layers_visible_button_handler(GtkWidget *w, gpointer d){
+  bool active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w));
+  if (active){
+    gui_templates_spawn_layers_window();
+    window_layers_visible = true;
+  } else {
+    gui_templates_destroy(_window_layers, _window_layers);
+    window_layers_visible = false;
+  }
+}
+
+void gui_templates_toggle_window_layers_visible(GtkWidget *w, gpointer d){
+  (void) w; (void) d;
+  bool active = window_layers_visible? false : true;
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(_window_layers_visible_toggle), active);
 }

@@ -225,6 +225,9 @@ bool dharma_sessions_destroy_all(){
  *
  *********/
 
+uint32_t dharma_session_get_id(D_Session *s){
+  return s->ID;
+}
 D_Image *dharma_session_get_layer_sum(D_Session *s){
   return s->layer_sum;
 }
@@ -370,6 +373,13 @@ const char *dharma_session_get_filename(D_Session *s){
  *
  *********/
 
+bool dharma_session_set_selected_session(uint32_t index){
+  if (index > nsessions){
+    return false;
+  }
+  selected_session = index;
+  return true;
+}
 bool dharma_session_set_selected_layer(D_Session *s, uint32_t index){
   if (index >= s->nlayers){
     return false;
@@ -542,6 +552,42 @@ bool dharma_session_remove_layer(D_Session *s, uint32_t index){
   return true;
 }
 
+bool dharma_session_swap_sessions(uint32_t a, uint32_t b){
+  if (a >= nsessions || b >= nsessions){
+    return false;
+  }
+
+  D_Session *aux = sessions[a];
+  sessions[a] = sessions[b];
+  sessions[b] = aux;
+
+  sessions[a]->ID = a;
+  sessions[b]->ID = b;
+
+  return true;
+}
+bool dharma_session_slide_session(uint32_t src, uint32_t dest){
+  if (src < dest){
+    uint32_t i;
+
+    for (i = src; i < dest; i++){
+      dharma_session_swap_sessions(i, i+1);
+    }
+    return true;
+  }
+
+  if (src > dest){
+    uint32_t i;
+
+    for (i = src; i > dest; i--){
+      dharma_session_swap_sessions(i, i-1);
+    }
+    return true;
+  }
+
+  return false;
+}
+
 bool dharma_session_slide_layer(D_Session *s, uint32_t src, uint32_t dest){
   if (src < dest){
     uint32_t i;
@@ -625,24 +671,22 @@ bool dharma_session_update_layer_sum(D_Session *s, uint32_t x, uint32_t y, uint3
   //Update area
   if (Bpp == 2 || Bpp == 4){
     for (layer = s->nlayers-1; layer >= 0; layer--){
-      if (!dharma_image_is_visible(s->layers[layer])){
-          continue;
-      }
+      if (dharma_image_is_visible(s->layers[layer])){
+        data_layer = dharma_image_get_data(s->layers[layer]);
 
-      data_layer = dharma_image_get_data(s->layers[layer]);
-
-      for (i = y; i < y+h; i++){
-      for (j = x; j < x+w; j++){
-        //If data_sum is already 255 opacity we stop calculating
-        if (data_sum[(i*s->w + j) * Bpp + (Bpp -1)] != 255){
-          // Pixel colors
-          for (k = 0; k < Bpp-1; k++){
-            data_sum[(i*s->w + j)*Bpp + k] = MIN(sum_colors_1Bpc(data_sum[(i*s->w + j)*Bpp + k], data_layer[(i*s->w + j)*Bpp + k], data_sum[(i*s->w + j)*Bpp + (Bpp-1)], data_layer[(i*s->w + j)*Bpp + (Bpp-1)]), 255);
+        for (i = y; i < y+h; i++){
+        for (j = x; j < x+w; j++){
+          //If data_sum is already 255 opacity we stop calculating
+          if (data_sum[(i*s->w + j) * Bpp + (Bpp -1)] != 255){
+            // Pixel colors
+            for (k = 0; k < Bpp-1; k++){
+              data_sum[(i*s->w + j)*Bpp + k] = MIN(sum_colors_1Bpc(data_sum[(i*s->w + j)*Bpp + k], data_layer[(i*s->w + j)*Bpp + k], data_sum[(i*s->w + j)*Bpp + (Bpp-1)], data_layer[(i*s->w + j)*Bpp + (Bpp-1)]), 255);
+            }
+            //Opacity
+            data_sum[(i*s->w + j)*Bpp + (Bpp-1)] = MIN(sum_opacities_1Bpc(data_sum[(i*s->w + j)*Bpp + (Bpp-1)], data_layer[(i*s->w + j)*Bpp + (Bpp-1)]), 255);
           }
-          //Opacity
-          data_sum[(i*s->w + j)*Bpp + (Bpp-1)] = MIN(sum_opacities_1Bpc(data_sum[(i*s->w + j)*Bpp + (Bpp-1)], data_layer[(i*s->w + j)*Bpp + (Bpp-1)]), 255);
         }
-      }
+        }
       }
     }
   } else {

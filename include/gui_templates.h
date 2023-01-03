@@ -26,6 +26,9 @@
 
 void draw_main_window(GtkWidget *window, gpointer data);
 
+//SPAWNERS
+void gui_templates_spawn_layers_window();
+
 //Gui elements constructors
 GtkWidget *gui_templates_get_mainscreen_menubar();
 GtkWidget *gui_templates_get_sessions_notebook();
@@ -34,6 +37,8 @@ GtkWidget *gui_templates_get_canvas_from_session(D_Session *s);
 GtkWidget *gui_templates_get_viewmode_toolbar(D_Session *s);
 
 GtkWidget *gui_templates_get_layers_window_box(D_Session *s);
+
+GtkWidget *gui_templates_get_window_toggling_toolbar();
 
 GdkPixbuf *gui_templates_pixbuf_from_image(D_Image *im);
 GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t daw, uint32_t dah, float *newcx, float *newcy);
@@ -54,6 +59,13 @@ void gui_templates_update_session_and_redraw(D_Session *s);
 void gui_templates_set_window_layers(GtkWidget *w);
 
 //Handlers
+void gui_templates_notebook_page_reordered_handler(GtkNotebook* self,GtkWidget* child, uint32_t page_num, gpointer data);
+
+void gui_templates_close_session_handler(GtkWidget *w, gpointer d);
+
+void gui_templates_toggle_window_layers_visible(GtkWidget *w, gpointer d);
+void gui_templates_toggle_window_layers_visible_button_handler(GtkWidget *w, gpointer d);
+
 void gui_templates_notebook_switch_page_handler(GtkWidget *notebook, GtkWidget *page, uint32_t pagenum, gpointer data);
 
 void gui_templates_new_layer_button_handler(GtkWidget *w, gpointer d);
@@ -63,6 +75,9 @@ void gui_templates_move_layer_up_button_handler(GtkWidget *w, gpointer d);
 void gui_templates_move_layer_down_button_handler(GtkWidget *w, gpointer d);
 
 void gui_templates_select_layer_handler(GtkWidget *w, gpointer d);
+void gui_templates_select_layer_handler_buttonpress(GtkWidget *w, GdkEventButton *ev, gpointer d);
+
+void gui_templates_toggle_layer_visibility_handler(GtkWidget *w, gpointer d);
 
 void gui_templates_zoomin_button_handler(GtkWidget *w, gpointer d);
 void gui_templates_zoomout_button_handler(GtkWidget *w, gpointer d);

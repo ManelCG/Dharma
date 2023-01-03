@@ -25,6 +25,8 @@
 #define DHARMA_LAYERS_WINDOW_NAME "Dharma Layers"
 #define DHARMA_LAYERS_WINDOW_WIDGET_NAME "Dharma Layers Window WGNAME"
 
+#define DHARMA_PAGE_LINKED_SESSION_DATA "Dharma Page Linked Session Data"
+
 /*******************
  *
  * COLOR DEFINITIONS

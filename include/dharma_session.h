@@ -36,9 +36,11 @@ bool dharma_session_destroy(D_Session *s);
 bool dharma_sessions_destroy_all();
 
 //Getters & setters
+uint32_t dharma_session_get_id(D_Session *s);
 D_Session *dharma_session_get_session_from_id(uint32_t id);
 uint32_t dharma_session_get_nsessions();
 const D_Session **dharma_session_get_sessions();
+uint32_t dharma_session_get_session_num(D_Session *s);
 
 void dharma_session_set_spanx(D_Session *s, float span);
 void dharma_session_set_spany(D_Session *s, float span);
@@ -108,6 +110,9 @@ bool dharma_session_remove_layer(D_Session *s, uint32_t index);
 
 bool dharma_session_swap_layers(D_Session *s, uint32_t a, uint32_t b);
 bool dharma_session_slide_layer(D_Session *s, uint32_t src, uint32_t dest);
+
+bool dharma_session_swap_sessions(uint32_t a, uint32_t b);
+bool dharma_session_slide_session(uint32_t src, uint32_t dest);
 
 //Session image operations
 bool dharma_session_rotate_clockwise(D_Session *s);
