@@ -1002,8 +1002,10 @@ void gui_templates_move_layer_down_button_handler(GtkWidget *w, gpointer d){
 }
 void gui_templates_remove_layer_button_handler(GtkWidget *w, gpointer d){
   D_Session *s = (D_Session *) d;
-  uint32_t index = dharma_session_get_selected_layer_index(s);
-  dharma_session_remove_layer(s, index);
+  int32_t index = dharma_session_get_selected_layer_index(s);
+  if (dharma_session_remove_layer(s, index)){
+    dharma_session_set_selected_layer(s, MAX(index -1, 0));
+  }
 
   gui_templates_update_session_and_redraw(s);
 
@@ -1012,7 +1014,9 @@ void gui_templates_remove_layer_button_handler(GtkWidget *w, gpointer d){
 }
 void gui_templates_new_layer_button_handler(GtkWidget *w, gpointer d){
   D_Session *s = (D_Session *) d;
-  dharma_session_add_layer(s);
+  if (dharma_session_add_layer(s)){
+    dharma_session_set_selected_layer(s, dharma_session_get_nlayers(s)-1);
+  }
 
   gui_templates_update_session_and_redraw(s);
 
