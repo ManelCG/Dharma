@@ -37,6 +37,8 @@ typedef struct D_Image {
   uint32_t h;
   uint32_t bpp;
 
+  bool visible;
+
   char *name;
   D_Session *owner_session;
 
@@ -59,6 +61,8 @@ D_Image *dharma_image_new_empty(uint32_t w, uint32_t h, uint32_t bpp){
 
   im->data = calloc(w * h * bpp, 1);
 
+  im->visible = true;
+
   im->name = NULL;
 
   return im;
@@ -73,6 +77,8 @@ D_Image *dharma_image_new_from_data(uint8_t *data, uint32_t w, uint32_t h, uint3
   im->bpp = bpp;
 
   im->data = data;
+
+  im->visible = true;
 
   im->name = NULL;
 
@@ -192,6 +198,14 @@ bool dharma_image_set_pixel_from_2Barray(D_Image *im, uint32_t x, uint32_t y, co
 
   memcpy(&im->data[(y*im->w + x) * Bpp], array, Bpp / 2);
   return true;
+}
+
+bool dharma_image_is_visible(D_Image *im){
+  return im->visible;
+}
+
+void dharma_image_set_visible(D_Image *im, bool v){
+  im->visible = v;
 }
 
 /*********************

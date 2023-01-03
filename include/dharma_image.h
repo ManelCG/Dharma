@@ -56,6 +56,9 @@ bool dharma_image_set_pixel_from_2Barray(D_Image *im, uint32_t x, uint32_t y, co
 void *dharma_image_get_owner_session(D_Image *im);
 void dharma_image_set_owner_session(D_Image *im, void *s);
 
+bool dharma_image_is_visible(D_Image *im);
+void dharma_image_set_visible(D_Image *im, bool v);
+
 //Image operations
 bool dharma_image_fill_canvas(D_Image *im, uint64_t color);
 

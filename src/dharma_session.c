@@ -625,7 +625,12 @@ bool dharma_session_update_layer_sum(D_Session *s, uint32_t x, uint32_t y, uint3
   //Update area
   if (Bpp == 2 || Bpp == 4){
     for (layer = s->nlayers-1; layer >= 0; layer--){
+      if (!dharma_image_is_visible(s->layers[layer])){
+          continue;
+      }
+
       data_layer = dharma_image_get_data(s->layers[layer]);
+
       for (i = y; i < y+h; i++){
       for (j = x; j < x+w; j++){
         //If data_sum is already 255 opacity we stop calculating
