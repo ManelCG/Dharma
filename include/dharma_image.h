@@ -41,6 +41,9 @@ uint32_t dharma_image_get_height(D_Image *im);
 uint32_t dharma_image_get_bpp(D_Image *im);
 uint32_t dharma_image_get_Bpp(D_Image *im);
 
+bool dharma_image_set_name(D_Image *im, const char *name);
+const char *dharma_image_get_name(D_Image *im);
+
 uint8_t *dharma_image_get_data(D_Image *im);
 const uint8_t *dharma_image_get_data_cnt(D_Image *im);
 uint8_t *dharma_image_get_pixel(D_Image *im, uint32_t x, uint32_t y);
@@ -59,6 +62,9 @@ bool dharma_image_rotate_180(D_Image *im);
 
 bool dharma_image_flip_horizontally(D_Image *im);
 bool dharma_image_flip_vertically(D_Image *im);
+
+//Helpers
+void dharma_image_set_default_name(D_Image *im, uint32_t n);
 
 //Debug tools
 void dharma_image_print(D_Image *im);

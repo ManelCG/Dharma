@@ -33,6 +33,9 @@ GtkWidget *gui_templates_get_welcome_screen_box();
 GtkWidget *gui_templates_get_canvas_from_session(D_Session *s);
 GtkWidget *gui_templates_get_viewmode_toolbar(D_Session *s);
 
+GtkWidget *gui_templates_get_layers_window_box(D_Session *s);
+
+GdkPixbuf *gui_templates_pixbuf_from_image(D_Image *im);
 GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t daw, uint32_t dah, float *newcx, float *newcy);
 
 void gui_templates_new_file_window(GtkWidget *w_unused, gpointer gp_unused);
@@ -44,7 +47,19 @@ D_Session *gui_templates_open_file();
 void gui_templates_clear_container(GtkWidget *container);
 void gui_templates_destroy(GtkWidget *w, gpointer data);
 
+void gui_templates_update_layers_window(GtkWidget *window, D_Session *s);
+void gui_templates_update_session_and_redraw(D_Session *s);
+
+
 //Handlers
+void gui_templates_new_layer_button_handler(GtkWidget *w, gpointer d);
+void gui_templates_remove_layer_button_handler(GtkWidget *w, gpointer d);
+
+void gui_templates_move_layer_up_button_handler(GtkWidget *w, gpointer d);
+void gui_templates_move_layer_down_button_handler(GtkWidget *w, gpointer d);
+
+void gui_templates_select_layer_handler(GtkWidget *w, gpointer d);
+
 void gui_templates_zoomin_button_handler(GtkWidget *w, gpointer d);
 void gui_templates_zoomout_button_handler(GtkWidget *w, gpointer d);
 

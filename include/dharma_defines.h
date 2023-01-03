@@ -20,7 +20,10 @@
 #ifndef __DHARMA_DEFINES_H_
 #define __DHARMA_DEFINES_H_
 
-#define DHARMA_MAINWINDOW_WIDGET_NAME "Dharma Main Window"
+#define DHARMA_MAINWINDOW_WIDGET_NAME "Dharma Main Window WGNAME"
+
+#define DHARMA_LAYERS_WINDOW_NAME "Dharma Layers"
+#define DHARMA_LAYERS_WINDOW_WIDGET_NAME "Dharma Layers Window WGNAME"
 
 /*******************
  *

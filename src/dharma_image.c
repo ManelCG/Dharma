@@ -36,6 +36,8 @@ typedef struct D_Image {
   uint32_t h;
   uint32_t bpp;
 
+  char *name;
+
   uint8_t *data;
 } D_Image;
 
@@ -55,6 +57,8 @@ D_Image *dharma_image_new_empty(uint32_t w, uint32_t h, uint32_t bpp){
 
   im->data = calloc(w * h * bpp, 1);
 
+  im->name = NULL;
+
   return im;
 }
 
@@ -67,6 +71,8 @@ D_Image *dharma_image_new_from_data(uint8_t *data, uint32_t w, uint32_t h, uint3
   im->bpp = bpp;
 
   im->data = data;
+
+  im->name = NULL;
 
   return im;
 }
@@ -102,6 +108,10 @@ bool dharma_image_destroy(D_Image *im){
     free(im->data);
   }
 
+  if (im->name != NULL){
+    free(im->name);
+  }
+
   free(im);
   return true;
 }
@@ -120,6 +130,14 @@ uint32_t dharma_image_get_Bpp(D_Image *im){
   return im->bpp / 8;
 }
 
+const char *dharma_image_get_name(D_Image *im){
+  if (im->name == NULL){
+    return "Unnamed image";
+  } else {
+    return im->name;
+  }
+}
+
 uint8_t *dharma_image_get_data(D_Image *im){
   return im->data;
 }
@@ -131,6 +149,21 @@ uint8_t *dharma_image_get_pixel(D_Image *im, uint32_t x, uint32_t y){
 }
 const uint8_t *dharma_image_get_pixel_cnt(D_Image *im, uint32_t x, uint32_t y){
   return (const uint8_t *) &(im->data[im->bpp * (im->w * y + x)/8]);
+}
+
+//Setters
+bool dharma_image_set_name(D_Image *im, const char *name){
+  if (name == NULL){
+    return false;
+  }
+
+  if (im->name != NULL){
+    free(im->name);
+  }
+
+  im->name = malloc(sizeof(name[0]) * (strlen(name) + 1));
+  strcpy(im->name, name);
+  return true;
 }
 
 bool dharma_image_set_pixel_from_uint64(D_Image *im, uint32_t x, uint32_t y, uint64_t color){
@@ -281,6 +314,15 @@ bool dharma_image_flip_vertically(D_Image *im){
   im->data = data;
 
   return true;
+}
+
+//Helpers
+void dharma_image_set_default_name(D_Image *im, uint32_t n){
+  char *layer = "Layer ";
+  char buffer[strlen(layer) + 16];
+  snprintf(buffer, strlen(layer) + 15, "%s %d", layer, n);
+
+  dharma_image_set_name(im, buffer);
 }
 
 //Debug tools

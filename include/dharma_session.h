@@ -76,6 +76,7 @@ void dharma_session_set_gtk_da(D_Session *s, void *da);
 void *dharma_session_get_gtk_da(D_Session *s);
 
 D_Image *dharma_session_get_layer(D_Session *s, uint32_t layer);
+uint32_t dharma_session_get_nlayers(D_Session *s);
 
 const char *dharma_session_get_path(D_Session *s);
 bool dharma_session_set_path(D_Session *s, const char *name);
@@ -91,6 +92,8 @@ bool dharma_session_is_image_valid(D_Session *s, D_Image *im);
 
 D_Session *dharma_session_get_selected_session();
 D_Image  *dharma_session_get_selected_layer(D_Session *s);
+uint32_t dharma_session_get_selected_layer_index(D_Session *s);
+bool dharma_session_set_selected_layer(D_Session *d, uint32_t index);
 
 D_Image *dharma_session_get_layer_sum(D_Session *s);
 bool dharma_session_update_layer_sum(D_Session *s, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
@@ -99,6 +102,8 @@ bool dharma_session_update_layer_sum(D_Session *s, uint32_t x, uint32_t y, uint3
 bool dharma_session_add_layer_from_image(D_Session *s, D_Image *im);
 bool dharma_session_add_layer(D_Session *s);
 bool dharma_session_remove_layer(D_Session *s, uint32_t index);
+
+bool dharma_session_swap_layers(D_Session *s, uint32_t a, uint32_t b);
 
 //Session image operations
 bool dharma_session_rotate_clockwise(D_Session *s);

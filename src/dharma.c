@@ -34,29 +34,41 @@
 int main(int argc, char *argv[]){
   gtk_init(&argc, &argv);
 
-  // D_Session *s = dharma_session_new(200, 500, 32);
-  // D_Image *im = dharma_image_new_empty(200, 500, 32);
-  // D_Image *firstlayer = dharma_session_get_layer(s, 0);
-  // dharma_image_fill_canvas(firstlayer, DHARMA_RED_32B);
-  // printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
-  // printf("%s\n", dharma_session_add_layer_from_image(s, im) == true? "Success" : "Failure");
-  // dharma_session_set_filename(s, "Red.png");
-  // printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
-  // printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
-  // printf("%s\n", dharma_session_add_layer(s) == true? "Success" : "Failure");
-  // s = dharma_session_new(1920, 1080, 32);
-  // dharma_session_set_filename(s, "1920x1080");
+  D_Session *s;
+  D_Image *im, *firstlayer;
+
+  s = dharma_session_new(200, 500, 32);
+  firstlayer = dharma_session_get_layer(s, 0);
+  dharma_image_fill_canvas(firstlayer, 0xFF000080);
+  im = dharma_image_new_empty(200, 500, 32);
+  dharma_image_fill_canvas(im, 0x00FF0080);
+  dharma_session_add_layer_from_image(s, im);
+  dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
+  dharma_session_set_filename(s, "Red.png");
+  // dharma_session_swap_layers(s, 0, 1);
+
+  s = dharma_session_new(1920, 1080, 32);
+  dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
+  dharma_session_set_filename(s, "1920x1080");
+
   // s = dharma_session_new(1280, 720, 24);
   // dharma_session_set_filename(s, "1280x720");
+  // dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
+
   // s = dharma_session_new(500, 500, 24);
   // im = dharma_session_get_layer(s, 0);
   // dharma_image_fill_canvas_random(im);
+  // dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
   // dharma_session_set_filename(s, "Random");
+
   // s = dharma_session_new(420, 69, 24);
   // im = dharma_session_get_layer(s, 0);
   // dharma_image_fill_canvas_sequential(im);
+  // dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
   // dharma_session_set_filename(s, "Sequential");
+
   // s = dharma_session_new(438, 793, 32);
+  // dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
   // dharma_session_set_filename(s, "438x793");
 
   // dharma_sessions_destroy_all();
@@ -71,7 +83,19 @@ int main(int argc, char *argv[]){
   gtk_container_set_border_width(GTK_CONTAINER(window_root), 0);
   gtk_window_set_default_size(GTK_WINDOW(window_root), 1200, 800);
 
+  GtkWidget *window_layers = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_title(GTK_WINDOW(window_layers), DHARMA_LAYERS_WINDOW_NAME);
+  gtk_widget_set_name(window_layers, DHARMA_LAYERS_WINDOW_WIDGET_NAME);
+  g_signal_connect(window_layers, "destroy", G_CALLBACK(gui_templates_destroy), (gpointer) window_layers);
+  gtk_window_set_position(GTK_WINDOW(window_layers), GTK_WIN_POS_CENTER);
+  gtk_container_set_border_width(GTK_CONTAINER(window_layers), 5);
+  gtk_window_set_default_size(GTK_WINDOW(window_layers), 280, 300);
+
   draw_main_window(window_root, NULL);
+  gtk_widget_show_all(window_root);
+
+  gtk_container_add(GTK_CONTAINER(window_layers), gui_templates_get_layers_window_box(dharma_session_get_session_from_id(0)));
+  gtk_widget_show_all(window_layers);
   gtk_main();
   return 0;
 }

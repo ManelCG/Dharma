@@ -95,6 +95,8 @@ D_Session *dharma_session_new_private(uint32_t w, uint32_t h, uint32_t bpp){
 
   s->layer_sum = NULL;
 
+  s->selected_layer = 0;
+
   s->scale = 1;
 
   s->ID = nsessions;
@@ -119,6 +121,8 @@ D_Session *dharma_session_new(uint32_t w, uint32_t h, uint32_t bpp){
   s->nlayers = 1;
   s->selected_layer = 0;
 
+  dharma_image_set_default_name(im, s->nlayers);
+
   D_Image *layer_sum = dharma_image_new_empty(w, h, bpp);
   s->layer_sum = malloc(sizeof(D_Image *));
   s->layer_sum = layer_sum;
@@ -136,26 +140,7 @@ D_Session *dharma_session_new_from_data(uint8_t *data, uint32_t w, uint32_t h, u
   s->nlayers = 1;
   s->selected_layer = 0;
 
-  im = dharma_image_new_from_data(data, w, h, bpp);
-  dharma_session_add_layer_from_image(s, im);
-  // im = dharma_image_new_from_data(data, w, h, bpp);
-  // dharma_session_add_layer_from_image(s, im);
-  // im = dharma_image_new_from_data(data, w, h, bpp);
-  // dharma_session_add_layer_from_image(s, im);
-  // im = dharma_image_new_from_data(data, w, h, bpp);
-  // dharma_session_add_layer_from_image(s, im);
-  // im = dharma_image_new_from_data(data, w, h, bpp);
-  // dharma_session_add_layer_from_image(s, im);
-  // im = dharma_image_new_from_data(data, w, h, bpp);
-  // dharma_session_add_layer_from_image(s, im);
-  // im = dharma_image_new_from_data(data, w, h, bpp);
-  // dharma_session_add_layer_from_image(s, im);
-  // im = dharma_image_new_from_data(data, w, h, bpp);
-  // dharma_session_add_layer_from_image(s, im);
-  // im = dharma_image_new_from_data(data, w, h, bpp);
-  // dharma_session_add_layer_from_image(s, im);
-  // im = dharma_image_new_from_data(data, w, h, bpp);
-  // dharma_session_add_layer_from_image(s, im);
+  dharma_image_set_default_name(im, s->nlayers);
 
   D_Image *layer_sum = dharma_image_new_empty(w, h, bpp);
   s->layer_sum = malloc(sizeof(D_Image *));
@@ -338,7 +323,13 @@ D_Session *dharma_session_get_selected_session(){
 D_Image  *dharma_session_get_selected_layer(D_Session *s){
   return s->layers[s->selected_layer];
 }
+uint32_t  dharma_session_get_selected_layer_index(D_Session *s){
+  return s->selected_layer;
+}
 
+uint32_t dharma_session_get_nlayers(D_Session *s){
+  return s->nlayers;
+}
 D_Image *dharma_session_get_layer(D_Session *s, uint32_t layer){
   if (layer >= s->nlayers){
     return NULL;
@@ -373,6 +364,14 @@ const char *dharma_session_get_filename(D_Session *s){
  *
  *********/
 
+bool dharma_session_set_selected_layer(D_Session *s, uint32_t index){
+  if (index >= s->nlayers){
+    return false;
+  }
+  s->selected_layer = index;
+  return true;
+}
+
 //Sets the filename for the session. If an old filename already existed, it is safely freed.
 bool dharma_session_set_path(D_Session *s, const char *name){
   if (name == NULL){
@@ -383,7 +382,7 @@ bool dharma_session_set_path(D_Session *s, const char *name){
     free(s->path);
   }
 
-  s->path = malloc(name[0] * (strlen(name) + 1));
+  s->path = malloc(sizeof(name[0]) * (strlen(name) + 1));
   strcpy(s->path, name);
   return true;
 }
@@ -396,7 +395,7 @@ bool dharma_session_set_filename(D_Session *s, const char *name){
     free(s->filename);
   }
 
-  s->filename = malloc(name[0] * (strlen(name) + 1));
+  s->filename = malloc(sizeof(name[0]) * (strlen(name) + 1));
   strcpy(s->filename, name);
   return true;
 }
@@ -480,6 +479,8 @@ bool dharma_session_add_layer_from_image(D_Session *s, D_Image *im){
     s->layers = malloc(sizeof(D_Image *) * s->nlayers);
   }
 
+  dharma_image_set_default_name(im, s->nlayers);
+
   s->layers[s->nlayers-1] = im;
 
   return true;
@@ -487,6 +488,9 @@ bool dharma_session_add_layer_from_image(D_Session *s, D_Image *im){
 //Creates a new empty image and adds it as layer to D_Session s.
 bool dharma_session_add_layer(D_Session *s){
   D_Image *im = dharma_image_new_empty(s->w, s->h, s->bpp);
+
+  dharma_image_set_default_name(im, s->nlayers + 1);
+
   return dharma_session_add_layer_from_image(s, im);
 }
 
@@ -530,6 +534,18 @@ bool dharma_session_remove_layer(D_Session *s, uint32_t index){
   return true;
 }
 
+bool dharma_session_swap_layers(D_Session *s, uint32_t a, uint32_t b){
+  if (a >= s->nlayers || b >= s->nlayers){
+    return false;
+  }
+
+  D_Image *aux = s->layers[a];
+  s->layers[a] = s->layers[b];
+  s->layers[b] = aux;
+
+  return true;
+}
+
 
 /********************
  *
@@ -537,14 +553,23 @@ bool dharma_session_remove_layer(D_Session *s, uint32_t index){
  *
  ********************/
 
-uint8_t sum_opacities(uint8_t a1, uint8_t a2){
+uint8_t sum_opacities_1Bpc(uint8_t a1, uint8_t a2){
   return (a1 + a2) - (a1 * a2) / 255;
 }
-uint8_t sum_colors(uint8_t c1, uint8_t c2, uint8_t p1, uint8_t p2){
+uint16_t sum_opacities_2Bpc(uint16_t a1, uint16_t a2){
+  return (a1 + a2) - (a1 * a2) / 65535;
+}
+uint8_t sum_colors_1Bpc(uint8_t c1, uint8_t c2, uint8_t p1, uint8_t p2){
   float fp1 = (float) p1/255;
   float fp2 = (float) p2/255;
 
-  return (fp1*c1 + fp2*c2 - fp1*fp2*c2)/(fp1+fp2 - (fp1*fp2));
+  return MIN(MAX((fp1*c1 + fp2*c2 - fp1*fp2*c2)/(fp1+fp2 - (fp1*fp2)), 0), 255);
+}
+uint16_t sum_colors_2Bpc(uint16_t c1, uint16_t c2, uint16_t p1, uint16_t p2){
+  float fp1 = (float) p1/65535;
+  float fp2 = (float) p2/65535;
+
+  return MIN(MAX((fp1*c1 + fp2*c2 - fp1*fp2*c2)/(fp1+fp2 - (fp1*fp2)), 0), 65535);
 }
 
 bool dharma_session_update_layer_sum(D_Session *s, uint32_t x, uint32_t y, uint32_t w, uint32_t h){
@@ -569,7 +594,7 @@ bool dharma_session_update_layer_sum(D_Session *s, uint32_t x, uint32_t y, uint3
   }
 
   //Update area
-  if (Bpp == 2 || Bpp == 4 || Bpp == 8){
+  if (Bpp == 2 || Bpp == 4){
     for (layer = s->nlayers-1; layer >= 0; layer--){
       data_layer = dharma_image_get_data(s->layers[layer]);
       for (i = y; i < y+h; i++){
@@ -578,10 +603,10 @@ bool dharma_session_update_layer_sum(D_Session *s, uint32_t x, uint32_t y, uint3
         if (data_sum[(i*s->w + j) * Bpp + (Bpp -1)] != 255){
           // Pixel colors
           for (k = 0; k < Bpp-1; k++){
-            data_sum[(i*s->w + j)*Bpp + k] = MIN(sum_colors(data_sum[(i*s->w + j)*Bpp + k], data_layer[(i*s->w + j)*Bpp + k], data_sum[(i*s->w + j)*Bpp + (Bpp-1)], data_layer[(i*s->w + j)*Bpp + (Bpp-1)]), 255);
+            data_sum[(i*s->w + j)*Bpp + k] = MIN(sum_colors_1Bpc(data_sum[(i*s->w + j)*Bpp + k], data_layer[(i*s->w + j)*Bpp + k], data_sum[(i*s->w + j)*Bpp + (Bpp-1)], data_layer[(i*s->w + j)*Bpp + (Bpp-1)]), 255);
           }
           //Opacity
-          data_sum[(i*s->w + j)*Bpp + (Bpp-1)] = MIN(sum_opacities(data_sum[(i*s->w + j)*Bpp + (Bpp-1)], data_layer[(i*s->w + j)*Bpp + (Bpp-1)]), 255);
+          data_sum[(i*s->w + j)*Bpp + (Bpp-1)] = MIN(sum_opacities_1Bpc(data_sum[(i*s->w + j)*Bpp + (Bpp-1)], data_layer[(i*s->w + j)*Bpp + (Bpp-1)]), 255);
         }
       }
       }

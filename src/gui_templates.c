@@ -68,6 +68,121 @@ void draw_main_window(GtkWidget *window, gpointer data){
  *
  ***************************/
 
+GtkWidget *gui_templates_get_layer_window_list_element(D_Session *s, uint32_t index){
+  D_Image *im = dharma_session_get_layer(s, index);
+
+  uint32_t max_width = 80;
+  uint32_t max_height = 60;
+  uint32_t width = dharma_image_get_width(im), height = dharma_image_get_height(im);
+  float ratio = (float) width/ (float) height;
+  char layer_index_string[16];
+  snprintf(layer_index_string, 15, "%d", index);
+
+  width = max_width;
+  height = (float) width / (float) ratio;
+
+  if (height > max_height){
+    height = max_height;
+    width = height * ratio;
+  }
+
+  GtkWidget *button_general = gtk_button_new();
+
+  GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  GdkPixbuf *pixbuf = gui_templates_pixbuf_from_image(im);
+
+  GdkPixbuf *pixbuf_scaled = gdk_pixbuf_scale_simple(pixbuf, width, height, GDK_INTERP_BILINEAR);
+  g_object_unref(pixbuf);
+
+  GtkWidget *check_selected_layer = gtk_check_button_new();
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_selected_layer), dharma_session_get_selected_layer_index(s) == index);
+
+  GtkWidget *image = gtk_image_new_from_pixbuf(pixbuf_scaled);
+  gtk_widget_set_size_request(image, max_width, max_height);
+
+  GtkWidget *image_label = gtk_label_new(dharma_image_get_name(im));
+
+  gtk_box_pack_start(GTK_BOX(box), check_selected_layer, false, false, 5);
+  gtk_box_pack_start(GTK_BOX(box), image, false, false, 5);
+  gtk_box_pack_start(GTK_BOX(box), image_label, false, false, 5);
+
+  gtk_container_add(GTK_CONTAINER(button_general), box);
+  gtk_widget_set_name(button_general, layer_index_string);
+  g_signal_connect(button_general, "activate", G_CALLBACK(gui_templates_select_layer_handler), (gpointer) s);
+  g_signal_connect(button_general, "pressed", G_CALLBACK(gui_templates_select_layer_handler), (gpointer) s);
+
+  return button_general;
+}
+
+GtkWidget *gui_templates_get_layers_window_box(D_Session *s){
+  int32_t i;
+
+  GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+
+  GtkWidget *top_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  GtkWidget *imagename_label = gtk_label_new(dharma_session_get_filename(s));
+
+  GtkWidget *scroll_window = gtk_scrolled_window_new(NULL, NULL);
+  GtkWidget *vbox_scroll = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+
+  GtkWidget *bot_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  GtkWidget *button_newlayer;
+  GtkWidget *button_movelayer_up;
+  GtkWidget *button_movelayer_down;
+  GtkWidget *button_removelayer;
+
+  //Fill scrollbox
+  if (s != NULL){
+    for (i = dharma_session_get_nlayers(s)-1; i >= 0; i--){
+      gtk_box_pack_start(GTK_BOX(vbox_scroll), gui_templates_get_layer_window_list_element(s, i), false, false, 0);
+    }
+  }
+
+  gtk_container_add(GTK_CONTAINER(scroll_window), vbox_scroll);
+
+  gtk_box_pack_start(GTK_BOX(top_hbox), imagename_label, false, false, 0);
+
+  //Buttons hbox
+  button_newlayer = gtk_button_new_with_label("+");
+  g_signal_connect(button_newlayer, "activate", G_CALLBACK(gui_templates_new_layer_button_handler), (gpointer) s);
+  g_signal_connect(button_newlayer, "pressed", G_CALLBACK(gui_templates_new_layer_button_handler), (gpointer) s);
+  gtk_box_pack_start(GTK_BOX(bot_hbox), button_newlayer, false, false, 0);
+
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+     gtk_box_pack_start(GTK_BOX(bot_hbox), separator, false, false, 0);}
+
+  button_movelayer_up = gtk_button_new();
+  g_signal_connect(button_movelayer_up, "activate", G_CALLBACK(gui_templates_move_layer_up_button_handler), (gpointer) s);
+  g_signal_connect(button_movelayer_up, "pressed", G_CALLBACK(gui_templates_move_layer_up_button_handler), (gpointer) s);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("go-up-symbolic", GTK_ICON_SIZE_MENU);
+    gtk_button_set_image(GTK_BUTTON(button_movelayer_up), icon); }
+  gtk_box_pack_start(GTK_BOX(bot_hbox), button_movelayer_up, false, false, 0);
+
+  button_movelayer_down = gtk_button_new();
+  g_signal_connect(button_movelayer_down, "activate", G_CALLBACK(gui_templates_move_layer_down_button_handler), (gpointer) s);
+  g_signal_connect(button_movelayer_down, "pressed", G_CALLBACK(gui_templates_move_layer_down_button_handler), (gpointer) s);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("go-down-symbolic", GTK_ICON_SIZE_MENU);
+    gtk_button_set_image(GTK_BUTTON(button_movelayer_down), icon); }
+  gtk_box_pack_start(GTK_BOX(bot_hbox), button_movelayer_down, false, false, 0);
+
+  {GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+     gtk_box_pack_start(GTK_BOX(bot_hbox), separator, false, false, 0);}
+
+  button_removelayer = gtk_button_new();
+  g_signal_connect(button_removelayer, "activate", G_CALLBACK(gui_templates_remove_layer_button_handler), (gpointer) s);
+  g_signal_connect(button_removelayer, "pressed", G_CALLBACK(gui_templates_remove_layer_button_handler), (gpointer) s);
+  { GtkWidget *icon = gtk_image_new_from_icon_name("edit-delete", GTK_ICON_SIZE_MENU);
+    gtk_button_set_image(GTK_BUTTON(button_removelayer), icon); }
+  gtk_box_pack_end(GTK_BOX(bot_hbox), button_removelayer, false, false, 0);
+
+  //Populate main box
+  gtk_box_pack_start(GTK_BOX(box), top_hbox, false, false, 0);
+  gtk_box_pack_start(GTK_BOX(box), scroll_window, true, true, 0);
+
+  gtk_box_pack_end(GTK_BOX(box), bot_hbox, false, false, 0);
+
+  return box;
+}
 GtkWidget *gui_templates_get_mainscreen_menubar(){
   GtkWidget *menu_menubar;
 
@@ -428,25 +543,15 @@ GtkWidget *gui_templates_get_viewmode_toolbar(D_Session *s){
   return main_hbox;
 }
 
-GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t da_width, uint32_t da_height, float *newcx, float *newcy){
-  GdkPixbuf *pixbuf = NULL;
-  GdkPixbuf *pixbuf_scaled = NULL;
-  GdkPixbuf *pixbuf_cropped = NULL;
-
-
-  //STEP 1: GENERATE FULL PIXBUF
-  D_Image *im = dharma_session_get_layer_sum(s);
+GdkPixbuf *gui_templates_pixbuf_from_image(D_Image *im){
   uint8_t *data = dharma_image_get_data(im);
+  GdkPixbuf *pixbuf = NULL;
 
-  float scale;
   uint32_t width, height, bpp, stride;
-  uint32_t centerx, centery;
   width = dharma_image_get_width(im);
   height = dharma_image_get_height(im);
   bpp = dharma_image_get_bpp(im);
   stride = width * bpp / 8;
-  scale = dharma_session_get_scale(s);
-  dharma_session_get_center(s, &centerx, &centery);
 
   //Generate pixbuf
   switch(bpp){
@@ -476,6 +581,27 @@ GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t da_width, ui
       break;
   }
 
+  return pixbuf;
+}
+
+GdkPixbuf *gui_templates_pixbuf_from_session(D_Session *s, uint32_t da_width, uint32_t da_height, float *newcx, float *newcy){
+  GdkPixbuf *pixbuf = NULL;
+  GdkPixbuf *pixbuf_scaled = NULL;
+  GdkPixbuf *pixbuf_cropped = NULL;
+
+
+  //STEP 1: GENERATE FULL PIXBUF
+  D_Image *im = dharma_session_get_layer_sum(s);
+
+  float scale;
+  uint32_t width, height;
+  uint32_t centerx, centery;
+  width = dharma_image_get_width(im);
+  height = dharma_image_get_height(im);
+  scale = dharma_session_get_scale(s);
+  dharma_session_get_center(s, &centerx, &centery);
+
+  pixbuf = gui_templates_pixbuf_from_image(im);
 
   //STEP 2: CROP PIXBUF BEFORE SCALING
 
@@ -807,12 +933,83 @@ void gui_templates_destroy(GtkWidget *w, gpointer data){
   gtk_widget_destroy(window);
 }
 
+void gui_templates_update_layers_window(GtkWidget *window, D_Session *s){
+  gui_templates_clear_container(window);
+  GtkWidget *b = gui_templates_get_layers_window_box(s);
+  gtk_container_add(GTK_CONTAINER(window), b);
+  gtk_widget_show_all(b);
+}
+
+void gui_templates_update_session_and_redraw(D_Session *s){
+  dharma_session_update_layer_sum(s, 0, 0, dharma_session_get_width(s), dharma_session_get_height(s));
+  on_window_draw(dharma_session_get_gtk_da(s), NULL, (gpointer) s);
+}
+
 /**********
  *
  * HANDLERS
  *
  **********/
 
+void gui_templates_select_layer_handler(GtkWidget *w, gpointer d){
+  D_Session *s = (D_Session *) d;
+  const char *widname = gtk_widget_get_name(w);
+  uint32_t index = atoi(widname);
+
+  dharma_session_set_selected_layer(s, index);
+
+  GtkWidget *window_layers = gtk_widget_get_toplevel(w);
+  gui_templates_update_layers_window(window_layers, s);
+}
+void gui_templates_move_layer_up_button_handler(GtkWidget *w, gpointer d){
+  D_Session *s = (D_Session *) d;
+
+  uint32_t layer = dharma_session_get_selected_layer_index(s);
+  if (layer != dharma_session_get_nlayers(s)){
+    if (dharma_session_swap_layers(s, layer, layer+1) == true){
+      dharma_session_set_selected_layer(s, layer+1);
+    }
+  }
+
+  gui_templates_update_session_and_redraw(s);
+
+  GtkWidget *window_layers = gtk_widget_get_toplevel(w);
+  gui_templates_update_layers_window(window_layers, s);
+}
+void gui_templates_move_layer_down_button_handler(GtkWidget *w, gpointer d){
+  D_Session *s = (D_Session *) d;
+
+  uint32_t layer = dharma_session_get_selected_layer_index(s);
+  if (layer != 0){
+    if (dharma_session_swap_layers(s, layer, layer-1) == true){
+      dharma_session_set_selected_layer(s, layer-1);
+    }
+  }
+
+  gui_templates_update_session_and_redraw(s);
+
+  GtkWidget *window_layers = gtk_widget_get_toplevel(w);
+  gui_templates_update_layers_window(window_layers, s);
+}
+void gui_templates_remove_layer_button_handler(GtkWidget *w, gpointer d){
+  D_Session *s = (D_Session *) d;
+  uint32_t index = dharma_session_get_selected_layer_index(s);
+  dharma_session_remove_layer(s, index);
+
+  gui_templates_update_session_and_redraw(s);
+
+  GtkWidget *window_layers = gtk_widget_get_toplevel(w);
+  gui_templates_update_layers_window(window_layers, s);
+}
+void gui_templates_new_layer_button_handler(GtkWidget *w, gpointer d){
+  D_Session *s = (D_Session *) d;
+  dharma_session_add_layer(s);
+
+  gui_templates_update_session_and_redraw(s);
+
+  GtkWidget *window_layers = gtk_widget_get_toplevel(w);
+  gui_templates_update_layers_window(window_layers, s);
+}
 void gui_templates_canvas_horizontal_adjustment_value_changed_handler(GtkAdjustment *adj, gpointer d){
   D_Session *s = (D_Session *) d;
   uint32_t value = gtk_adjustment_get_value(adj);
