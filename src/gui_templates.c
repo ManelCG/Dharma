@@ -69,6 +69,14 @@ GtkWidget *_notebook = NULL;
  *
  *********/
 
+/* All spawn auxwindows functions have some details worth noting:
+ * We move the window prior and after showing it.
+ * The reason of the move prior to showing it, is because if we move it afterwards, the window will briefly appear at the center of the screen, and then be moved.
+ * This causes a weird, fast blinking of the window when it is spawned.
+ * However, some systems / window managers ignore the move operations before showing the window, but most of the time process the following ones.
+ * Thus, we also move it after showing the window. If the window was already moved before, this second operation won't do anything.
+ * If the system ignores the first move operation, then the weird twitch will occur, but then the window will be properly moved to its correct destination.
+ */
 void gui_templates_spawn_history_window(){
   GtkWidget *window = gtk_dialog_new();
   gui_templates_clear_container(window);
@@ -82,6 +90,7 @@ void gui_templates_spawn_history_window(){
   gtk_window_set_default_size(GTK_WINDOW(window), 232, 190);
   gtk_container_add(GTK_CONTAINER(window), gui_templates_get_history_window_box(dharma_session_get_selected_session()));
   gui_templates_set_window_history(window);
+  gtk_window_move(GTK_WINDOW(window), window_history_position[0], window_history_position[1]);
   gtk_widget_show_all(window);
   gtk_widget_set_opacity(window, DHARMA_AUXWINDOWS_DEFAULT_OPACITY);
   gtk_window_move(GTK_WINDOW(window), window_history_position[0], window_history_position[1]);
@@ -96,9 +105,10 @@ void gui_templates_spawn_tools_window(){
   g_signal_connect(window, "leave-notify-event", G_CALLBACK(gui_templates_auxwindow_mouse_hover_handler), (gpointer) window);
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width(GTK_CONTAINER(window), 5);
-  gtk_window_set_default_size(GTK_WINDOW(window), 80, 400);
+  gtk_window_set_default_size(GTK_WINDOW(window), 80, 320);
   gtk_container_add(GTK_CONTAINER(window), gui_templates_get_tools_window_box(dharma_session_get_selected_session()));
   gui_templates_set_window_tools(window);
+  gtk_window_move(GTK_WINDOW(window), window_tools_position[0], window_tools_position[1]);
   gtk_widget_show_all(window);
   gtk_widget_set_opacity(window, DHARMA_AUXWINDOWS_DEFAULT_OPACITY);
   gtk_window_move(GTK_WINDOW(window), window_tools_position[0], window_tools_position[1]);
@@ -116,6 +126,7 @@ void gui_templates_spawn_colors_window(){
   gtk_window_set_default_size(GTK_WINDOW(window), 280, 300);
   gtk_container_add(GTK_CONTAINER(window), gui_templates_get_colors_window_box(dharma_session_get_selected_session()));
   gui_templates_set_window_colors(window);
+  gtk_window_move(GTK_WINDOW(window), window_colors_position[0], window_colors_position[1]);
   gtk_widget_show_all(window);
   gtk_widget_set_opacity(window, DHARMA_AUXWINDOWS_DEFAULT_OPACITY);
   gtk_window_move(GTK_WINDOW(window), window_colors_position[0], window_colors_position[1]);
@@ -133,6 +144,7 @@ void gui_templates_spawn_layers_window(){
   gtk_window_set_default_size(GTK_WINDOW(window), 232, 190);
   gtk_container_add(GTK_CONTAINER(window), gui_templates_get_layers_window_box(dharma_session_get_selected_session()));
   gui_templates_set_window_layers(window);
+  gtk_window_move(GTK_WINDOW(window), window_layers_position[0], window_layers_position[1]);
   gtk_widget_show_all(window);
   gtk_widget_set_opacity(window, DHARMA_AUXWINDOWS_DEFAULT_OPACITY);
   gtk_window_move(GTK_WINDOW(window), window_layers_position[0], window_layers_position[1]);
