@@ -86,6 +86,9 @@ int main(int argc, char *argv[]){
   gtk_widget_show_all(window_root);
 
   gui_templates_spawn_layers_window();
+  gui_templates_spawn_history_window();
+  gui_templates_spawn_colors_window();
+  gui_templates_spawn_tools_window();
 
   gtk_main();
   return 0;

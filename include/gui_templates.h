@@ -28,6 +28,9 @@ void draw_main_window(GtkWidget *window, gpointer data);
 
 //SPAWNERS
 void gui_templates_spawn_layers_window();
+void gui_templates_spawn_history_window();
+void gui_templates_spawn_tools_window();
+void gui_templates_spawn_colors_window();
 
 //Gui elements constructors
 GtkWidget *gui_templates_get_mainscreen_menubar();
@@ -37,6 +40,9 @@ GtkWidget *gui_templates_get_canvas_from_session(D_Session *s);
 GtkWidget *gui_templates_get_viewmode_toolbar(D_Session *s);
 
 GtkWidget *gui_templates_get_layers_window_box(D_Session *s);
+GtkWidget *gui_templates_get_tools_window_box(D_Session *s);
+GtkWidget *gui_templates_get_history_window_box(D_Session *s);
+GtkWidget *gui_templates_get_colors_window_box(D_Session *s);
 
 GtkWidget *gui_templates_get_window_toggling_toolbar();
 
@@ -57,6 +63,9 @@ void gui_templates_update_session_and_redraw(D_Session *s);
 
 
 void gui_templates_set_window_layers(GtkWidget *w);
+void gui_templates_set_window_history(GtkWidget *w);
+void gui_templates_set_window_tools(GtkWidget *w);
+void gui_templates_set_window_colors(GtkWidget *w);
 
 //Handlers
 void gui_templates_notebook_page_reordered_handler(GtkNotebook* self,GtkWidget* child, uint32_t page_num, gpointer data);
@@ -64,7 +73,13 @@ void gui_templates_notebook_page_reordered_handler(GtkNotebook* self,GtkWidget* 
 void gui_templates_close_session_handler(GtkWidget *w, gpointer d);
 
 void gui_templates_toggle_window_layers_visible(GtkWidget *w, gpointer d);
+void gui_templates_toggle_window_history_visible(GtkWidget *w, gpointer d);
+void gui_templates_toggle_window_tools_visible(GtkWidget *w, gpointer d);
+void gui_templates_toggle_window_colors_visible(GtkWidget *w, gpointer d);
 void gui_templates_toggle_window_layers_visible_button_handler(GtkWidget *w, gpointer d);
+void gui_templates_toggle_window_history_visible_button_handler(GtkWidget *w, gpointer d);
+void gui_templates_toggle_window_tools_visible_button_handler(GtkWidget *w, gpointer d);
+void gui_templates_toggle_window_colors_visible_button_handler(GtkWidget *w, gpointer d);
 
 void gui_templates_notebook_switch_page_handler(GtkWidget *notebook, GtkWidget *page, uint32_t pagenum, gpointer data);
 
@@ -98,5 +113,7 @@ void gui_templates_canvas_vertical_adjustment_value_changed_handler(GtkAdjustmen
 void gui_templates_canvas_horizontal_adjustment_value_changed_handler(GtkAdjustment *adj, gpointer d);
 
 void canvas_mouse_handler(GtkWidget *event_box, GdkEventButton *event, gpointer data);
+
+void gui_templates_auxwindow_mouse_hover_handler(GtkWidget *w, GdkEventCrossing *ev, gpointer data);
 
 #endif //__GUI_TEMPLATES_H_
